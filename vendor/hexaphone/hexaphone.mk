@@ -1,13 +1,39 @@
-# Debloat list — packages pulled in by full_manta.mk that we don't want in
-# Hexaphone by default. Starting point only; review against the actual
-# PRODUCT_PACKAGES set once synced (device/samsung/manta/full_manta.mk and
-# whatever it inherits) since package names must match exactly or the build
-# just silently keeps them.
-
-PRODUCT_PACKAGES_REMOVE += \
+# Debloat list — packages pulled in by full_manta.mk (or what it inherits)
+# that we don't want in Hexaphone by default.
+#
+# NOTE: PRODUCT_PACKAGES_REMOVE is an AOSP mechanism that doesn't exist yet
+# in this Pie-era tree (confirmed: zero references anywhere under build/) —
+# LineageParts/Eleven/Jelly sat in a PRODUCT_PACKAGES_REMOVE list here for
+# a while doing silently nothing before this was caught. The real
+# mechanism this vintage needs is filtering PRODUCT_PACKAGES directly,
+# which only works placed after the inherits that add these packages
+# (see hexaphone_manta.mk's inherit order — this file is included last).
+PRODUCT_PACKAGES := $(filter-out \
     LineageParts \
     Eleven \
-    Jelly
+    Jelly \
+    WAPPushManager \
+    MmsService \
+    Telecom \
+    TeleService \
+    TelephonyProvider \
+    ,$(PRODUCT_PACKAGES))
+
+# Telephony/MMS/telecom apps removed here, not because they're broken —
+# they compile fine (see patch-mms-service.sh, patch-telecom.sh for the
+# real version-skew bugs that had to be fixed to get them compiling at
+# all) — but because manta has no cellular modem or SIM slot, so they're
+# ~22MB of pure dead weight. Needed the space: device/samsung/manta's
+# BOARD_SYSTEMIMAGE_PARTITION_SIZE is a fixed 800MB (the real, physical
+# partition boundary on this hardware — not something we can just bump
+# up), and everything Hexaphone wanted to add pushed system.img to
+# ~896MB. Combined with dropping DuckDuckGo/FDroid below, this gets
+# comfortably back under budget instead of cutting it close.
+# Filter-out was already confirmed working correctly for
+# LineageParts/Eleven above — the actual system.img was still
+# showing them because of stale installed files left over from before
+# that fix, not because the mechanism was broken (installclean, or a
+# fresh sync, clears that).
 
 # Overlay (colors/fonts/icons) applied on top of frameworks/base — see
 # vendor/hexaphone/overlay/. Kept as a separate device overlay path so it's
@@ -44,11 +70,11 @@ PRODUCT_COPY_FILES += \
 # .apk files are in git — scripts/fetch-prebuilt-apks.sh fetches and
 # hash-pins all of them, wired into scripts/04-build.sh.
 #
-# - DuckDuckGo: default browser now that stock Jelly is removed above.
-# - FDroid + AuroraStore: app stores. There's no Play Store/GApps on this
-#   ROM, so these are how a user actually installs anything post-setup —
-#   F-Droid for FOSS apps, Aurora Store as a GApps-free Play Store client.
+# DuckDuckGo (167MB) and FDroid were both dropped here to fit the 800MB
+# system partition (see "system partition size" note below) — Aurora
+# Store alone is enough to get any app post-boot, DuckDuckGo included.
+# stock Jelly is still removed above regardless (broken/unwanted either
+# way), so there's currently no preinstalled browser at all; a user's
+# first Aurora Store install should probably be one.
 PRODUCT_PACKAGES += \
-    DuckDuckGo \
-    FDroid \
     AuroraStore

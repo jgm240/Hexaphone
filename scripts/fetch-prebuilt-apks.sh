@@ -11,11 +11,16 @@ set -euo pipefail
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 # name | package | version_code | sha256 | size_bytes
+#
+# DuckDuckGo and FDroid are no longer bundled (dropped for system
+# partition space — see vendor/hexaphone/hexaphone.mk) but their entries
+# are kept here, commented, since they're still correct/verified if that
+# decision ever gets revisited.
 APPS="
-DuckDuckGo|com.duckduckgo.mobile.android|52921000|126f79deacb7a7b087e3d085d971fb04e958afc1918a5838831f8f00f42694b8|176062923
-FDroid|org.fdroid.fdroid|1023052|985f5181d48bb6bafd54083a048b391271e0ab28385881cc41294fb01a222762|12426276
 AuroraStore|com.aurora.store|76|fd9c75d90d0f4a7c132b9b4a5a2cf1992a45e03b8d8ff988b7dcfbc0db2c4d11|9360088
 "
+# DuckDuckGo|com.duckduckgo.mobile.android|52921000|126f79deacb7a7b087e3d085d971fb04e958afc1918a5838831f8f00f42694b8|176062923
+# FDroid|org.fdroid.fdroid|1023052|985f5181d48bb6bafd54083a048b391271e0ab28385881cc41294fb01a222762|12426276
 
 fetch_one() {
   local name="$1" package="$2" version_code="$3" sha256="$4" size="$5"

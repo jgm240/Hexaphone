@@ -23,6 +23,35 @@ haven't tried to fix:
 - **NFC unreliable** — may not work correctly, reported to drain battery.
   NFC hardware support is removed from the build.
 
+## Known issues (introduced by getting this to actually build)
+
+Hitting these fixing/building Hexaphone itself — none are followmsi's fault,
+they're version-skew between the forked and stock parts of this tree. See
+`scripts/patch-*.sh` for the ones that were fixed at the source.
+
+- **No AOT-compiled boot image** — `dex2oatd` crashes natively
+  (`ClassLinker::InitWithoutImage`, a core ART bootstrap crash, not a
+  normal verifier rejection) trying to precompile `boot.art`. Root cause
+  not isolated — it crashes before per-class verification even starts,
+  so it needs real bisection across the boot classpath to locate.
+  Built with `WITH_DEXPREOPT=false` instead (see `scripts/04-build.sh`):
+  the device falls back to on-device dex2oat/interpretation at first
+  boot. Slower first boot, no other known functional loss.
+Fixed at the source (not known issues, just documenting what was wrong):
+`StaticIpConfiguration` was missing getter methods the stock WiFi code
+expected (`patch-frameworks-base.sh`); `MmsService`'s `IMms` Stub
+implementation expected a multi-user API the forked AIDL interface
+predates (`patch-mms-service.sh`); and Telecom
+(`packages/services/Telecomm`) had two separate mismatches — a missing
+`StatusHints.validateAccountIconUserBoundary()` method, and 6
+`ITelecomService.Stub` methods returning `ParceledListSlice<T>` where the
+forked AIDL interface still expects plain `List<T>` (`patch-telecom.sh`).
+Tried removing Telecom via the debloat list first (manta has no cellular
+modem, so it looked like dead weight) — turned out `PRODUCT_PACKAGES`
+filter-out doesn't actually drop it, something else in the tree still
+pulls it in as a build dependency regardless. Patched it properly instead
+since debloating wasn't actually an option here.
+
 ## Layout
 
 - `docker/` — Ubuntu 16.04 container matching the toolchain this era of

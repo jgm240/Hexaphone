@@ -28,6 +28,15 @@ echo "sync complete. Fetching LFS content repo sync can't smudge itself..."
 echo "Patching device tree (kernel Soong config bridge)..."
 "$PROJECT_ROOT/scripts/patch-device-tree.sh"
 
+echo "Patching frameworks/base (StaticIpConfiguration getter API)..."
+"$PROJECT_ROOT/scripts/patch-frameworks-base.sh"
+
+echo "Patching packages/services/Mms (IMms callingUser API mismatch)..."
+"$PROJECT_ROOT/scripts/patch-mms-service.sh"
+
+echo "Patching Telecom (StatusHints + ITelecomService API mismatch)..."
+"$PROJECT_ROOT/scripts/patch-telecom.sh"
+
 echo "Copying vendor/hexaphone and packages/hexaphone into source..."
 sync_overlay_trees
 echo "done."

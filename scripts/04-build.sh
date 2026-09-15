@@ -4,6 +4,9 @@ source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
 
 "$PROJECT_ROOT/scripts/fetch-prebuilt-apks.sh"
 "$PROJECT_ROOT/scripts/patch-device-tree.sh"
+"$PROJECT_ROOT/scripts/patch-frameworks-base.sh"
+"$PROJECT_ROOT/scripts/patch-mms-service.sh"
+"$PROJECT_ROOT/scripts/patch-telecom.sh"
 sync_overlay_trees
 
 # `breakfast hexaphone_manta` (no dash) would wrongly assume it's a stock
@@ -16,14 +19,29 @@ sync_overlay_trees
 #
 # Also skip `mka` (`m -j "$@"`, i.e. an unqualified -j — dangerous with
 # Docker only getting 8GB RAM here) in favor of an explicit job count.
-# Started at -j4, confirmed -j6 is safe (plenty of memory headroom); leaves
-# 2 of the container's 8 cores free rather than maxing out.
-JOBS="${BUILD_JOBS:-6}"
+# Started at -j4, confirmed -j7 is safe (memory has stayed well within
+# budget even in heavy phases); leaves 1 of the container's 8 cores free
+# rather than maxing out.
+JOBS="${BUILD_JOBS:-7}"
+
+# dex2oatd crashes (SIGABRT, native, inside art::ClassLinker::InitWithoutImage
+# during boot-image generation — a core ART bootstrap crash, not a normal
+# verifier rejection) trying to precompile the boot image on this tree.
+# Root cause not yet isolated — it's crashing before per-class verification
+# even starts, so it needs real bisection across the boot classpath dex
+# files to locate, not a quick patch like the WiFi/MMS API mismatches.
+# WITH_DEXPREOPT=false skips AOT boot-image compilation entirely (device
+# falls back to on-device dex2oat / interpretation at first boot — slower
+# first boot, no other functional loss) so we can get a working, flashable
+# build now rather than block everything on deep ART internals. Revisit:
+# flip back to true and re-investigate once the ROM is otherwise verified
+# working.
+DEXPREOPT="${HEXAPHONE_DEXPREOPT:-false}"
 
 docker_run "
   source build/envsetup.sh &&
   lunch hexaphone_manta-userdebug &&
-  m -j$JOBS bacon
+  WITH_DEXPREOPT=$DEXPREOPT m -j$JOBS bacon
 "
 
 # bacon.mk names its output lineage-$(LINEAGE_VERSION).zip — copy (not
