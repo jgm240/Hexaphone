@@ -1,0 +1,2 @@
+add_lunch_combo hexaphone_manta-userdebug
+add_lunch_combo hexaphone_manta-user

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Performance</string>
+
+    <string name="zram_section_title">ZRAM (compressed RAM swap)</string>
+    <string name="zram_enable">Enable ZRAM</string>
+    <string name="zram_algo_label">Compression algorithm</string>
+    <string name="zram_size_label">ZRAM size: %1$d MB</string>
+
+    <string name="swap_section_title">Swap file (storage)</string>
+    <string name="swap_enable">Enable swap file</string>
+    <string name="swap_size_label">Swap size: %1$d MB</string>
+
+    <string name="apply">Apply</string>
+    <string name="reboot_notice">Changes take effect after a reboot.</string>
+</resources>

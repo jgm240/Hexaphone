@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Framework overlay — values here override frameworks/base defaults for any
+  device that has DEVICE_PACKAGE_OVERLAYS pointed at vendor/hexaphone/overlay
+  (see vendor/hexaphone/hexaphone.mk). Confirmed against the actual synced
+  source (not guessed) — see vendor/hexaphone/art/README.md "Theme" section
+  for what this does and doesn't cover.
+-->
+<resources>
+  <!--
+    Adaptive icon mask (stock value, for reference, was the rounded-square
+    at frameworks/base/core/res/res/values/config.xml:3342). Flat-top
+    regular hexagon, circumradius 50 in the standard 100x100 viewport,
+    same orientation as the wallpaper/bootanimation mark. Only reshapes
+    apps that ship a proper <adaptive-icon> (foreground+background layers,
+    API 26+) — legacy square-icon apps are untouched, that's a framework
+    limitation, not something a resource overlay can fix.
+  -->
+  <string name="config_icon_mask" translatable="false">"M100,50L75,93.3 25,93.3 0,50 25,6.7 75,6.7Z"</string>
+
+  <!--
+    Default UI mode: MODE_NIGHT_YES (stock default is 1 / MODE_NIGHT_NO).
+    Settings and SystemUI in this tree already inherit Theme.DeviceDefault
+    (not .Light) so they render dark regardless — this setting is what
+    makes anything that DOES respect day/night resource qualifiers
+    (third-party apps, the wallpaper picker, etc.) default to dark too,
+    and it turns on SystemUI's extra dark-mode notification-shade color
+    adaptation (StatusBar.DARK_THEME_IN_NIGHT_MODE).
+  -->
+  <integer name="config_defaultNightMode">2</integer>
+</resources>

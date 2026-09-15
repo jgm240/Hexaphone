@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Hex outline (brand mark, matches wallpaper/bootanimation) with a gauge
+  needle inside — reads as "performance meter" while staying in the same
+  visual language as everything else. Content kept within the ~66dp safe
+  zone of the 108dp adaptive-icon canvas so it survives any mask shape.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#F2B705"
+        android:strokeWidth="3.5"
+        android:pathData="M84,54 L69,79.98 39,79.98 24,54 39,28.02 69,28.02 Z" />
+    <path
+        android:strokeColor="#FFD54A"
+        android:strokeWidth="4"
+        android:strokeLineCap="round"
+        android:pathData="M54,54 L69.43,35.61" />
+    <path
+        android:fillColor="#F2B705"
+        android:pathData="M54,54 m-5,0 a5,5 0 1,0 10,0 a5,5 0 1,0 -10,0" />
+</vector>

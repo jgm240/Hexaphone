@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Manta support on lineage-16.0 (Android 9) doesn't exist upstream — this
+  local manifest is a straight copy of the community unofficial port by
+  XDA developer followmsi, which replaces several stock LineageOS repos
+  with device-specific forks:
+  https://github.com/followmsi/manifests/tree/manta-lineage-16.0
+
+  Known issues per that port (see README.md "Known issues" for detail):
+  camera broken, hardware composer partly broken, encryption bootloops,
+  NFC unreliable. Camera2 app and NFC hardware are removed below for
+  exactly that reason — they don't work on this port.
+-->
+<manifest>
+  <remove-project name="LineageOS/android_packages_apps_Camera2" />
+  <remove-project name="LineageOS/android_hardware_broadcom_nfc" />
+  <remove-project name="platform/hardware/invensense" />
+  <remove-project name="LineageOS/android_frameworks_base" />
+  <remove-project name="LineageOS/android_frameworks_av" />
+  <remove-project name="LineageOS/android_hardware_broadcom_libbt" />
+  <remove-project name="LineageOS/android_vendor_lineage" />
+
+  <project name="followmsi/android_device_samsung_manta"
+           path="device/samsung/manta"
+           remote="github"
+           revision="los-16.0" />
+  <project name="followmsi/android_hardware_samsung_slsi_exynos5"
+           path="hardware/samsung_slsi/exynos5"
+           remote="github"
+           revision="manta-aosp-p" />
+  <project name="followmsi/android_kernel_samsung_manta"
+           path="kernel/samsung/manta"
+           remote="github"
+           revision="followmsi-pie" />
+  <project name="followmsi/android_hardware_invensense"
+           path="hardware/invensense"
+           remote="github"
+           revision="android-9.0-manta" />
+  <project name="followmsi/platform_frameworks_base"
+           path="frameworks/base"
+           remote="github"
+           revision="manta-los-16.0" />
+  <project name="followmsi/platform_frameworks_av"
+           path="frameworks/av"
+           remote="github"
+           revision="manta-los-16.0" />
+  <project name="followmsi/android_hardware_broadcom_libbt"
+           path="hardware/broadcom/libbt"
+           remote="github"
+           revision="manta-los-16.0" />
+  <project name="followmsi/android_vendor"
+           path="vendor/samsung/manta"
+           remote="github"
+           revision="manta-lineage-16.0" />
+  <project name="followmsi/android_vendor_lineage"
+           path="vendor/lineage"
+           remote="github"
+           revision="manta-los-16.0" />
+</manifest>

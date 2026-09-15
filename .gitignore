@@ -1,0 +1,4 @@
+.DS_Store
+*.sparseimage
+logs/
+vendor/hexaphone/prebuilt/apps/*/*.apk

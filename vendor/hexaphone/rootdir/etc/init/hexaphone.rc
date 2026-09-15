@@ -1,0 +1,23 @@
+# Hexaphone ZRAM/swap configuration.
+#
+# The Performance app only ever writes persist.sys.hexaphone.* properties
+# (see packages/hexaphone/Performance) — it has no root access. This
+# service applies that configuration at boot, running as root.
+#
+# Deliberately boot-time-only rather than live/hot-reconfigurable: zram
+# requires swapoff + reset before disksize/algorithm can change, and doing
+# that while the system is actively relying on existing zram swap risks
+# killing foreground apps under memory pressure. Simpler and safer to just
+# apply once at boot and tell the user changes need a reboot (see
+# res/values/strings.xml reboot_notice in the app).
+
+service hexaphone_zram /system/bin/hexaphone-zram.sh boot
+    class main
+    user root
+    group root
+    oneshot
+    disabled
+    seclabel u:r:hexaphone_zram:s0
+
+on post-fs-data
+    start hexaphone_zram

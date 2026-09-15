@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+      manta runs a 3.4 kernel; zstd zram support doesn't exist that far
+      back (mainline zram gained zstd around 4.19). Only list backends
+      that are plausible for this kernel — verify against the actual
+      defconfig (CONFIG_CRYPTO_LZO / CONFIG_CRYPTO_LZ4) once kernel
+      source is synced, and drop lz4 here if it turns out unavailable.
+    -->
+    <string-array name="zram_algo_entries">
+        <item>LZO</item>
+        <item>LZ4</item>
+    </string-array>
+    <string-array name="zram_algo_values">
+        <item>lzo</item>
+        <item>lz4</item>
+    </string-array>
+</resources>

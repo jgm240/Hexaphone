@@ -1,0 +1,46 @@
+# Hexaphone Performance app / zram-swap SELinux policy.
+#
+# DRAFT — this is a best-effort starting point, not verified against a real
+# boot. SELinux policy for a new domain always needs an iterate-against-
+# denials pass: build, boot with permissive logging, grep logcat for
+# "avc: denied" lines touching hexaphone_zram or hexaphone_prop, and either
+# add the specific allow rule audit2allow suggests or fix the real bug
+# (never just blanket-permissive this domain long-term).
+#
+# Expect at minimum to need: block_device access for /dev/block/zram0,
+# access to whatever type /sys/block/zram0 actually carries (check with
+# `ls -Z` on a booted device or in the kernel's sysfs genfscon rules),
+# toolbox/shell exec permissions (mkswap/swapon/dd are toolbox applets on
+# this era of Android), and data_file read/write for the swap file under
+# /data.
+
+# --- property that the Performance app (system_app) sets ---
+type hexaphone_prop, property_type;
+
+# --- domain the boot-time zram/swap script runs in ---
+type hexaphone_zram, domain;
+type hexaphone_zram_exec, exec_type, file_type;
+
+init_daemon_domain(hexaphone_zram)
+
+# system_app (the Performance app runs sharedUserId=android.uid.system,
+# which maps to the system_app domain) needs to set our property.
+set_prop(system_app, hexaphone_prop)
+
+# The zram/swap script needs to read the same property back.
+get_prop(hexaphone_zram, hexaphone_prop)
+
+# Toolbox applets (mkswap, swapon, swapoff, dd) invoked by the script.
+allow hexaphone_zram toolbox_exec:file rx_file_perms;
+
+# The swap file under /data.
+allow hexaphone_zram system_data_file:dir rw_dir_perms;
+allow hexaphone_zram system_data_file:file create_file_perms;
+
+# zram block device + its sysfs controls. block_device and sysfs are broad
+# placeholder types here — replace with whatever the actual kernel/device
+# tree labels /dev/block/zram0 and /sys/block/zram0/* as, once synced.
+allow hexaphone_zram block_device:dir search;
+allow hexaphone_zram block_device:blk_file rw_file_perms;
+allow hexaphone_zram sysfs:dir search;
+allow hexaphone_zram sysfs:file rw_file_perms;
