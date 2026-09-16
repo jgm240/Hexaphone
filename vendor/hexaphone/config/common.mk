@@ -6,9 +6,16 @@
 # once the source tree is synced (scripts/03-sync.sh) and adjust if the
 # actual variable names differ.
 
+# Bump these to match the git tag (alphavX.Y.0) each time a release is
+# tagged -- ro.hexaphone.version is the only on-device record of which
+# release is actually installed. Was stuck at 1.0 through the alphav1.1.0
+# release (nothing wired this to the tag automatically); caught while
+# building Hexaphone Updater (packages/hexaphone/Updater), though Updater
+# itself doesn't read it back -- SystemProperties is a hidden API and
+# Updater is deliberately unprivileged, so it has no way to check it.
 HEXAPHONE_BUILDTYPE := UNOFFICIAL
 HEXAPHONE_VERSION_MAJOR := 1
-HEXAPHONE_VERSION_MINOR := 0
+HEXAPHONE_VERSION_MINOR := 1
 
 PRODUCT_PROPERTY_OVERRIDES += \
     ro.hexaphone.version=$(HEXAPHONE_VERSION_MAJOR).$(HEXAPHONE_VERSION_MINOR) \

@@ -67,6 +67,11 @@ final class CatalogEntry {
                 "org.hexaphone.bootscreen",
                 "c9b2d46657044b972ade2b20d128aa113a11ce1e07ec2de4c4f5da74bc45b7cb", 29477L,
                 "https://raw.githubusercontent.com/jgm240/hexaphone-apps/main/bootscreen-app/Bootscreen.apk"),
+        fromUrl("Hexaphone Updater",
+                "Install or downgrade to any released Hexaphone version.",
+                "org.hexaphone.updater",
+                "8a60101066b38ca505432bb144741a996ce65116ea409ba5059e66cfe249104e", 29478L,
+                "https://raw.githubusercontent.com/jgm240/hexaphone-apps/main/updater-app/HexaphoneUpdater.apk"),
         comingSoon("More Hexaphone apps", "Coming soon."),
     };
 }

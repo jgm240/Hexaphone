@@ -17,6 +17,7 @@ PRODUCT_PACKAGES := $(filter-out \
     Telecom \
     TeleService \
     TelephonyProvider \
+    Updater \
     ,$(PRODUCT_PACKAGES))
 
 # Telephony/MMS/telecom apps removed here, not because they're broken —
@@ -34,6 +35,13 @@ PRODUCT_PACKAGES := $(filter-out \
 # showing them because of stale installed files left over from before
 # that fix, not because the mechanism was broken (installclean, or a
 # fresh sync, clears that).
+
+# LineageOS's own Updater (packages/apps/Updater, pulled in by
+# vendor/lineage/config/common.mk) points at LineageOS's own update
+# server and hasn't shipped an update since 2016 for anything -- useless
+# dead weight on a ROM with its own release cadence. Replaced by
+# Hexaphone Updater (packages/hexaphone/Updater), fetched on demand
+# through Hexaphone Store rather than preinstalled, same as Bootscreen.
 
 # Overlay (colors/fonts/icons) applied on top of frameworks/base — see
 # vendor/hexaphone/overlay/. Kept as a separate device overlay path so it's

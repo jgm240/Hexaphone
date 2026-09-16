@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Hexaphone Updater</string>
+    <string name="subtitle">Install or downgrade to any released Hexaphone version. Downloads and verifies the build here — you still flash it yourself from recovery, same as always.</string>
+
+    <string name="loading">Loading releases…</string>
+    <string name="releases_error">Couldn\'t load releases: %1$s</string>
+
+    <string name="current_version_badge">Currently installed (probably)</string>
+    <string name="action_download">Download</string>
+    <string name="action_retry">Retry</string>
+
+    <string name="status_downloaded">Downloaded to Android/data/org.hexaphone.updater/files/%1$s. Reboot to recovery (TWRP) and flash it from there.</string>
+</resources>
