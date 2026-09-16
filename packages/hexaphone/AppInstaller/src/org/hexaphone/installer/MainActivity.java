@@ -12,20 +12,26 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
  * Lists the catalog of apps this app can fetch+install (see CatalogEntry),
- * since none of them ship in the base system image any more -- see
- * vendor/hexaphone/hexaphone.mk for why DuckDuckGo and F-Droid were pulled
- * out of the build. Rows are indexed by display name (not package name):
- * InstallReceiver always has the display name (we pass it in ourselves),
- * but PackageInstaller only reliably fills in EXTRA_PACKAGE_NAME on
- * success, not on every failure path.
+ * fetched fresh from store/manifest.json on jgm240/hexaphone-apps every
+ * time this activity starts -- none of these apps ship in the base
+ * system image (see vendor/hexaphone/hexaphone.mk for why DuckDuckGo and
+ * F-Droid were pulled out of the build), and the catalog itself isn't
+ * baked into this APK either, so adding or updating an entry doesn't
+ * need a new Hexaphone build. Rows are indexed by display name (not
+ * package name): InstallReceiver always has the display name (we pass it
+ * in ourselves), but PackageInstaller only reliably fills in
+ * EXTRA_PACKAGE_NAME on success, not on every failure path.
  */
 public class MainActivity extends Activity implements InstallResultBus.Listener {
 
-    private final Map<String, RowViews> rowsByDisplayName = new HashMap<>();
+    private LinearLayout listContainer;
+    private TextView emptyState;
+    private final Map<String, RowViews> rowsByDisplayName = new HashMap<String, RowViews>();
 
     private static class RowViews {
         CatalogEntry entry;
@@ -39,10 +45,35 @@ public class MainActivity extends Activity implements InstallResultBus.Listener 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        LinearLayout listContainer = (LinearLayout) findViewById(R.id.list_container);
-        LayoutInflater inflater = LayoutInflater.from(this);
+        listContainer = (LinearLayout) findViewById(R.id.list_container);
+        emptyState = (TextView) findViewById(R.id.empty_state);
 
-        for (CatalogEntry entry : CatalogEntry.ALL) {
+        loadCatalog();
+    }
+
+    private void loadCatalog() {
+        emptyState.setText(R.string.loading);
+        emptyState.setVisibility(View.VISIBLE);
+        new CatalogFetchTask(new CatalogFetchTask.Listener() {
+            @Override
+            public void onCatalogResult(CatalogFetchTask.Result result) {
+                if (result.error != null) {
+                    emptyState.setText(getString(R.string.catalog_error, result.error));
+                    emptyState.setVisibility(View.VISIBLE);
+                    return;
+                }
+                showCatalog(result.entries);
+            }
+        }).execute();
+    }
+
+    private void showCatalog(List<CatalogEntry> entries) {
+        emptyState.setVisibility(View.GONE);
+        listContainer.removeAllViews();
+        rowsByDisplayName.clear();
+
+        LayoutInflater inflater = LayoutInflater.from(this);
+        for (CatalogEntry entry : entries) {
             View row = inflater.inflate(R.layout.row_app, listContainer, false);
             TextView name = (TextView) row.findViewById(R.id.row_name);
             TextView description = (TextView) row.findViewById(R.id.row_description);
@@ -68,6 +99,7 @@ public class MainActivity extends Activity implements InstallResultBus.Listener 
                         onActionClicked(rv);
                     }
                 });
+                refreshRowState(rv);
             }
 
             listContainer.addView(row);

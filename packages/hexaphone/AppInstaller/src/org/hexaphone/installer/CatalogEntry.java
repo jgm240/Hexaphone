@@ -1,16 +1,23 @@
 package org.hexaphone.installer;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.List;
+
 /**
- * One row in the app catalog. sha256/sizeBytes for the F-Droid-hosted
- * entries are the same pins used by scripts/fetch-prebuilt-apks.sh for
- * the apps this ROM used to bundle directly — DuckDuckGo and F-Droid were
- * dropped from the system image for space (see vendor/hexaphone/hexaphone.mk),
- * so this app fetches and verifies them the same way, on demand, instead.
- * Bootscreen is a Hexaphone-built app hosted on jgm240/hexaphone-apps
- * rather than F-Droid, hence the explicit downloadUrl field instead of
- * always deriving one from an F-Droid package/version pair.
+ * One row in the app catalog, parsed from store/manifest.json in
+ * jgm240/hexaphone-apps rather than hardcoded here -- adding an app or
+ * updating a pin used to mean a full ROM rebuild to ship a new
+ * CatalogEntry.ALL, just to change a list. Same pattern as Bootscreen's
+ * own preset manifest (BootscreenPreset in the Bootscreen app).
  */
 final class CatalogEntry {
+    static final String MANIFEST_URL =
+            "https://raw.githubusercontent.com/jgm240/hexaphone-apps/main/store/manifest.json";
+
     final String displayName;
     final String description;
     final String packageName;
@@ -30,48 +37,26 @@ final class CatalogEntry {
         this.available = available;
     }
 
-    static CatalogEntry fromFDroid(String displayName, String description, String packageName,
-            long versionCode, String sha256, long sizeBytes) {
-        String url = "https://f-droid.org/repo/" + packageName + "_" + versionCode + ".apk";
-        return new CatalogEntry(displayName, description, packageName, sha256, sizeBytes, url,
-                true);
-    }
-
-    static CatalogEntry fromUrl(String displayName, String description, String packageName,
-            String sha256, long sizeBytes, String downloadUrl) {
-        return new CatalogEntry(displayName, description, packageName, sha256, sizeBytes,
-                downloadUrl, true);
-    }
-
-    static CatalogEntry comingSoon(String displayName, String description) {
-        return new CatalogEntry(displayName, description, null, null, 0, null, false);
-    }
-
     String downloadUrl() {
         return downloadUrl;
     }
 
-    static final CatalogEntry[] ALL = {
-        fromFDroid("DuckDuckGo Browser",
-                "Privacy-focused browser. There's no preinstalled browser on Hexaphone.",
-                "com.duckduckgo.mobile.android", 52921000L,
-                "126f79deacb7a7b087e3d085d971fb04e958afc1918a5838831f8f00f42694b8",
-                176062923L),
-        fromFDroid("F-Droid",
-                "Catalog of free & open-source Android apps.",
-                "org.fdroid.fdroid", 1023052L,
-                "985f5181d48bb6bafd54083a048b391271e0ab28385881cc41294fb01a222762",
-                12426276L),
-        fromUrl("Bootscreen",
-                "Pick a boot animation from a curated set of colors and speeds.",
-                "org.hexaphone.bootscreen",
-                "c9b2d46657044b972ade2b20d128aa113a11ce1e07ec2de4c4f5da74bc45b7cb", 29477L,
-                "https://raw.githubusercontent.com/jgm240/hexaphone-apps/main/bootscreen-app/Bootscreen.apk"),
-        fromUrl("Hexaphone Updater",
-                "Install or downgrade to any released Hexaphone version.",
-                "org.hexaphone.updater",
-                "8a60101066b38ca505432bb144741a996ce65116ea409ba5059e66cfe249104e", 29478L,
-                "https://raw.githubusercontent.com/jgm240/hexaphone-apps/main/updater-app/HexaphoneUpdater.apk"),
-        comingSoon("More Hexaphone apps", "Coming soon."),
-    };
+    static List<CatalogEntry> parseManifest(String json) throws JSONException {
+        List<CatalogEntry> entries = new ArrayList<CatalogEntry>();
+        JSONObject root = new JSONObject(json);
+        JSONArray array = root.getJSONArray("apps");
+        for (int i = 0; i < array.length(); i++) {
+            JSONObject entry = array.getJSONObject(i);
+            boolean available = entry.optBoolean("available", true);
+            entries.add(new CatalogEntry(
+                    entry.getString("displayName"),
+                    entry.getString("description"),
+                    entry.optString("packageName", null),
+                    entry.optString("sha256", null),
+                    entry.optLong("sizeBytes", 0),
+                    entry.optString("downloadUrl", null),
+                    available));
+        }
+        return entries;
+    }
 }

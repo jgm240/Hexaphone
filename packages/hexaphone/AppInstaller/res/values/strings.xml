@@ -3,6 +3,9 @@
     <string name="app_name">Hexaphone Store</string>
     <string name="subtitle">Extra apps for Hexaphone. Nothing here is preinstalled — there\'s no Play Store or GApps on this ROM.</string>
 
+    <string name="loading">Loading catalog…</string>
+    <string name="catalog_error">Couldn\'t load the catalog: %1$s</string>
+
     <string name="action_install">Install</string>
     <string name="action_open">Open</string>
     <string name="action_retry">Retry</string>
