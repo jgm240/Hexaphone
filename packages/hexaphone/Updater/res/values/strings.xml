@@ -6,9 +6,12 @@
     <string name="loading">Loading releases…</string>
     <string name="releases_error">Couldn\'t load releases: %1$s</string>
 
-    <string name="current_version_badge">Currently installed (probably)</string>
     <string name="action_download">Download</string>
     <string name="action_retry">Retry</string>
 
     <string name="status_downloaded">Downloaded to Android/data/org.hexaphone.updater/files/%1$s. Reboot to recovery (TWRP) and flash it from there.</string>
+
+    <string name="self_update_title">Hexaphone Updater %1$s available</string>
+    <string name="action_self_update">Update</string>
+    <string name="status_installing_self_update">Installing… the app may restart.</string>
 </resources>

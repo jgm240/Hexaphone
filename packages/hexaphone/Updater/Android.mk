@@ -9,10 +9,12 @@ LOCAL_RESOURCE_DIR := $(LOCAL_PATH)/res
 # still part of this tree even though we don't include it in
 # PRODUCT_PACKAGES.
 LOCAL_PACKAGE_NAME := HexaphoneUpdater
-# Deliberately unprivileged and default-signed: unlike Bootscreen and
-# Hexaphone Store, this app has no need to write anywhere but its own
-# external files dir, so it needs no shared UID, no platform signature,
-# and no hidden APIs.
+# Still deliberately unprivileged (no shared UID, no hidden APIs) --
+# just platform-signed now, same as Hexaphone Store, so
+# REQUEST_INSTALL_PACKAGES (protectionLevel signature|appop) auto-grants
+# on signature match for self-updating without an extra "allow this
+# source" prompt.
+LOCAL_CERTIFICATE := platform
 LOCAL_PROGUARD_ENABLED := disabled
 LOCAL_SDK_VERSION := current
 

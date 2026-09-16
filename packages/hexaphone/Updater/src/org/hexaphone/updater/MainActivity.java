@@ -34,6 +34,14 @@ public class MainActivity extends Activity implements DownloadReleaseTask.Listen
     private DownloadReleaseTask runningTask;
     private RowViews currentTaskRow;
 
+    private View selfUpdateBanner;
+    private View selfUpdateDivider;
+    private TextView selfUpdateTitle;
+    private TextView selfUpdateStatus;
+    private Button selfUpdateAction;
+    private SelfUpdateInfo pendingSelfUpdate;
+    private SelfUpdateInstallTask selfUpdateTask;
+
     private static class RowViews {
         ReleaseInfo release;
         TextView status;
@@ -48,7 +56,84 @@ public class MainActivity extends Activity implements DownloadReleaseTask.Listen
         listContainer = (LinearLayout) findViewById(R.id.list_container);
         emptyState = (TextView) findViewById(R.id.empty_state);
 
+        selfUpdateBanner = findViewById(R.id.self_update_banner);
+        selfUpdateDivider = findViewById(R.id.self_update_divider);
+        selfUpdateTitle = (TextView) findViewById(R.id.self_update_title);
+        selfUpdateStatus = (TextView) findViewById(R.id.self_update_status);
+        selfUpdateAction = (Button) findViewById(R.id.self_update_action);
+        selfUpdateAction.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startSelfUpdate();
+            }
+        });
+
+        checkSelfUpdate();
         loadReleases();
+    }
+
+    private void checkSelfUpdate() {
+        new SelfUpdateCheckTask(this, new SelfUpdateCheckTask.Listener() {
+            @Override
+            public void onSelfUpdateResult(SelfUpdateInfo info) {
+                if (info == null) {
+                    return;
+                }
+                pendingSelfUpdate = info;
+                selfUpdateTitle.setText(getString(R.string.self_update_title, info.versionName));
+                selfUpdateBanner.setVisibility(View.VISIBLE);
+                selfUpdateDivider.setVisibility(View.VISIBLE);
+            }
+        }).execute();
+    }
+
+    private void startSelfUpdate() {
+        if (selfUpdateTask != null || pendingSelfUpdate == null) {
+            return;
+        }
+        selfUpdateAction.setEnabled(false);
+        selfUpdateTask = new SelfUpdateInstallTask(this, pendingSelfUpdate,
+                new SelfUpdateInstallTask.Listener() {
+                    @Override
+                    public void onStatus(final String status) {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                selfUpdateStatus.setVisibility(View.VISIBLE);
+                                selfUpdateStatus.setText(status);
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onError(final String error) {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                selfUpdateStatus.setVisibility(View.VISIBLE);
+                                selfUpdateStatus.setText(error);
+                                selfUpdateAction.setEnabled(true);
+                                selfUpdateTask = null;
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onHandedOff() {
+                        // Real success/failure lands via
+                        // SelfUpdateInstallReceiver, and a successful
+                        // self-update kills+restarts this process on its
+                        // own -- just note that the handoff worked.
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                selfUpdateStatus.setVisibility(View.VISIBLE);
+                                selfUpdateStatus.setText(R.string.status_installing_self_update);
+                            }
+                        });
+                    }
+                });
+        selfUpdateTask.execute();
     }
 
     private void loadReleases() {

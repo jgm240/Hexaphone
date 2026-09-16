@@ -1,8 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="org.hexaphone.updater">
+    package="org.hexaphone.updater"
+    android:versionCode="1"
+    android:versionName="1.0">
+
+    <!--
+      versionCode is what SelfUpdateCheckTask compares against
+      updater-app/manifest.json on jgm240/hexaphone-apps; bump it here
+      (and in that manifest) every time HexaphoneUpdater.apk itself
+      changes, same idea as vendor/hexaphone/config/common.mk's version
+      bump for the ROM as a whole.
+    -->
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- protectionLevel signature|appop: auto-granted here on signature
+         match with the platform cert (see Android.mk), same reasoning as
+         Hexaphone Store; skips the "allow installs from this source"
+         prompt on first self-update. -->
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
 
     <application
         android:label="@string/app_name"
@@ -18,6 +33,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <receiver
+            android:name=".SelfUpdateInstallReceiver"
+            android:exported="false" />
 
     </application>
 </manifest>
