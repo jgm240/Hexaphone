@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Static resting-pose preview shown in the system wallpaper picker;
+     the actual live wallpaper spins (see HexSpinWallpaperService). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="200dp"
+    android:height="320dp"
+    android:viewportWidth="200"
+    android:viewportHeight="320">
+
+    <path android:fillColor="#000000" android:pathData="M0,0h200v320h-200z" />
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#F2B705"
+        android:strokeWidth="4"
+        android:pathData="M160,147 L130,198.96 70,198.96 40,147 70,95.04 130,95.04 Z" />
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#8AF2B705"
+        android:strokeWidth="2"
+        android:pathData="M132.2,165.6 L100,184.2 67.8,165.6 67.8,128.4 100,109.8 132.2,128.4 Z" />
+    <path
+        android:fillColor="#F2B705"
+        android:pathData="M108.4,147 L104.2,154.27 95.8,154.27 91.6,147 95.8,139.73 104.2,139.73 Z" />
+</vector>

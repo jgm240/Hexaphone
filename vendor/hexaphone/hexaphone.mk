@@ -53,7 +53,7 @@ PRODUCT_COPY_FILES += \
 # overlay approach is stable back to well before this era.
 # (vendor/hexaphone/overlay/frameworks/base/core/res/res/drawable-nodpi/default_wallpaper.png)
 
-# Performance app (ZRAM / swap file control) — see
+# System Tweaks (ZRAM / swap file control, SELinux permissive toggle) — see
 # packages/hexaphone/Performance. Needs matching sepolicy + an init.rc
 # import wired into the device tree; see patches/device/README.md for the
 # two-line patch that still needs to be applied once device/samsung/manta
@@ -61,9 +61,31 @@ PRODUCT_COPY_FILES += \
 PRODUCT_PACKAGES += \
     Performance
 
+# Hexaphone Store (packages/hexaphone/AppInstaller) -- fetches, hash-verifies,
+# and installs DuckDuckGo/F-Droid on demand, since dropping them from the
+# system image (see "Bundled third-party apps" below) means they're no
+# longer preinstalled. Uses the same pinned name/package/version/sha256
+# data as scripts/fetch-prebuilt-apks.sh, just at runtime instead of build
+# time.
+PRODUCT_PACKAGES += \
+    AppInstaller
+
+# Live wallpaper: the boot mark, spinning (packages/hexaphone/LiveWallpaper).
+# Selectable from the system wallpaper picker's "Live Wallpapers" category;
+# the actual *default* wallpaper stays the static image above (see
+# vendor/hexaphone/wallpaper + the drawable-sw*dp-nodpi overlay variants),
+# this is an additional option, not a default-wallpaper replacement.
+PRODUCT_PACKAGES += \
+    LiveWallpaper
+
+# Bootscreen: NOT built into system.img. It's fetched on demand through
+# AppInstaller (see CatalogEntry.java) from jgm240/hexaphone-apps, same as
+# DuckDuckGo/F-Droid -- see packages/hexaphone/Bootscreen.
+
 PRODUCT_COPY_FILES += \
     vendor/hexaphone/rootdir/etc/init/hexaphone.rc:system/etc/init/hexaphone.rc \
-    vendor/hexaphone/bin/hexaphone-zram.sh:system/bin/hexaphone-zram.sh
+    vendor/hexaphone/bin/hexaphone-zram.sh:system/bin/hexaphone-zram.sh \
+    vendor/hexaphone/bin/hexaphone-selinux-permissive.sh:system/bin/hexaphone-selinux-permissive.sh
 
 # Bundled third-party apps, all F-Droid builds kept presigned (see each
 # Android.mk under vendor/hexaphone/prebuilt/apps/ for why). None of the

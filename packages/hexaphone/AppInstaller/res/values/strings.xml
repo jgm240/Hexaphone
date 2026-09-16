@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Hexaphone Store</string>
+    <string name="subtitle">Extra apps for Hexaphone. Nothing here is preinstalled — there\'s no Play Store or GApps on this ROM.</string>
+
+    <string name="action_install">Install</string>
+    <string name="action_open">Open</string>
+    <string name="action_retry">Retry</string>
+    <string name="action_coming_soon">Coming soon</string>
+
+    <string name="status_downloading">Downloading…</string>
+    <string name="status_verifying">Verifying…</string>
+    <string name="status_installing">Installing…</string>
+    <string name="status_installed">Installed</string>
+
+    <string name="error_download_failed">Download failed. Check your connection and retry.</string>
+    <string name="error_verify_failed">Couldn\'t verify the download. Retry.</string>
+    <string name="error_hash_mismatch">Download didn\'t match its expected checksum. Retry.</string>
+    <string name="error_install_failed">Install failed: %1$s</string>
+</resources>

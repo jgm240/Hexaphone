@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Bootscreen</string>
+    <string name="subtitle">Pick a boot animation. Takes effect next reboot.</string>
+
+    <string name="loading">Loading presets…</string>
+    <string name="manifest_error">Couldn\'t load the preset list: %1$s</string>
+
+    <string name="action_apply">Apply</string>
+    <string name="action_reapply">Reapply</string>
+    <string name="status_applied">Applied — takes effect next reboot</string>
+</resources>

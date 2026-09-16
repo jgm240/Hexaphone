@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="org.hexaphone.bootscreen"
+    android:sharedUserId="android.uid.system">
+
+    <!--
+      Runs as the system UID purely so it can write directly into
+      /data/hexaphone_bootscreen (owned system:system, mode 0755; see
+      ApplyPresetTask and vendor/hexaphone/rootdir/etc/init/hexaphone.rc).
+      bootanimation itself (patched, see scripts/patch-bootanimation.sh)
+      reads bootanimation.zip from there directly at next boot; no
+      privileged "apply" step or /system write needed at all.
+    -->
+
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <application
+        android:label="@string/app_name"
+        android:icon="@mipmap/ic_launcher"
+        android:persistent="false">
+
+        <activity
+            android:name=".MainActivity"
+            android:label="@string/app_name"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+    </application>
+</manifest>

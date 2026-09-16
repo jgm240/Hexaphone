@@ -21,3 +21,30 @@ service hexaphone_zram /system/bin/hexaphone-zram.sh boot
 
 on post-fs-data
     start hexaphone_zram
+    # Bootscreen app (packages/hexaphone/Bootscreen) writes hash-verified
+    # bootanimation.zip presets here as bootanimation.zip (see
+    # scripts/patch-bootanimation.sh, which makes bootanimation itself
+    # check this path directly -- no root "apply" step needed at all).
+    # system:system owner so the app (sharedUserId=android.uid.system)
+    # can write directly; mode 0755 (not 0770) since bootanimation runs
+    # as user/group graphics, not system -- DAC and SELinux are both
+    # independently enforced, so this needs to be world-readable on top
+    # of the SELinux grant in hexaphone.te. SELinux type comes from
+    # vendor/hexaphone/sepolicy/file_contexts, applied automatically by
+    # this mkdir action.
+    mkdir /data/hexaphone_bootscreen 0755 system system
+
+# SELinux permissive-mode button (Performance app, System section). A
+# plain sys.* property, not persist.* -- this represents a one-shot
+# command ("do this now"), not state to reapply at every boot, and
+# setenforce 0 itself already only lasts until the next reboot regardless.
+service hexaphone_selinux_permissive /system/bin/hexaphone-selinux-permissive.sh
+    class main
+    user root
+    group root
+    oneshot
+    disabled
+    seclabel u:r:hexaphone_selinux_permissive:s0
+
+on property:sys.hexaphone.selinux_permissive=1
+    start hexaphone_selinux_permissive

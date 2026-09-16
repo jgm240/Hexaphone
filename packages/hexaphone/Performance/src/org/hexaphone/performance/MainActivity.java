@@ -28,6 +28,10 @@ public class MainActivity extends Activity {
     private static final String PROP_SWAP_ENABLED = "persist.sys.hexaphone.swap.enabled";
     private static final String PROP_SWAP_SIZE_MB = "persist.sys.hexaphone.swap.size_mb";
 
+    // Not persist.* -- a one-shot command ("do this now"), not state to
+    // reapply at every boot. See vendor/hexaphone/rootdir/etc/init/hexaphone.rc.
+    private static final String PROP_SELINUX_PERMISSIVE = "sys.hexaphone.selinux_permissive";
+
     // Total RAM is 2GB. ZRAM eats real RAM to hold compressed pages, so it
     // must stay well under that — cap at 1.5GB, default to something modest.
     private static final int ZRAM_MIN_MB = 64;
@@ -47,6 +51,8 @@ public class MainActivity extends Activity {
     private Switch switchSwap;
     private SeekBar seekbarSwapSize;
     private TextView labelSwapSize;
+
+    private TextView labelSelinuxPermissive;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -87,6 +93,15 @@ public class MainActivity extends Activity {
             @Override
             public void onClick(View v) {
                 apply();
+            }
+        });
+
+        labelSelinuxPermissive = (TextView) findViewById(R.id.label_selinux_permissive);
+        findViewById(R.id.button_selinux_permissive).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                SystemProperties.set(PROP_SELINUX_PERMISSIVE, "1");
+                labelSelinuxPermissive.setText(R.string.selinux_permissive_done);
             }
         });
 

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Hex outline (brand mark) with a play glyph inside, reading as "boot
+  animation playback" rather than a specific app category. Content kept
+  within the ~66dp safe zone of the 108dp adaptive-icon canvas.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#F2B705"
+        android:strokeWidth="3.5"
+        android:pathData="M84,54 L69,79.98 39,79.98 24,54 39,28.02 69,28.02 Z" />
+    <path
+        android:fillColor="#FFD54A"
+        android:pathData="M46,40 L46,68 70,54 Z" />
+</vector>

@@ -1,46 +1,96 @@
-# Hexaphone Performance app / zram-swap SELinux policy.
+# Hexaphone system-app-adjacent SELinux policy.
 #
-# DRAFT — this is a best-effort starting point, not verified against a real
-# boot. SELinux policy for a new domain always needs an iterate-against-
-# denials pass: build, boot with permissive logging, grep logcat for
-# "avc: denied" lines touching hexaphone_zram or hexaphone_prop, and either
-# add the specific allow rule audit2allow suggests or fix the real bug
-# (never just blanket-permissive this domain long-term).
+# The first real build of this policy (once it was actually wired into
+# BOARD_SEPOLICY_DIRS -- see scripts/patch-device-tree.sh) failed
+# checkpolicy's neverallow assertions, not just missing `allow` rules:
 #
-# Expect at minimum to need: block_device access for /dev/block/zram0,
-# access to whatever type /sys/block/zram0 actually carries (check with
-# `ls -Z` on a booted device or in the kernel's sysfs genfscon rules),
-# toolbox/shell exec permissions (mkswap/swapon/dd are toolbox applets on
-# this era of Android), and data_file read/write for the swap file under
-# /data.
+#   - "Nobody should be doing writes to /system & /vendor" (domain.te) is
+#     an unconditional block on every domain -- no exemption exists to
+#     grant, so a root script overwriting /system/media/bootanimation.zip
+#     can never compile, regardless of how the allow rules are written.
+#   - `neverallow { domain -kernel -init -recovery } block_device:blk_file
+#     { open read write };` similarly blocks raw zram block-device access
+#     from any domain but those three.
+#   - `neverallow { domain -system_server -system_app -init -installd
+#     -vold_prepare_subdirs } system_data_file:file no_w_file_perms;`
+#     blocks writing swap-file contents under the default /data type too.
+#   - `neverallow * kernel:security setenforce;` has no exemption list at
+#     all -- no domain can ever hold an explicit allow rule for it.
+#
+# `permissive <domain>;` sidesteps the first three legitimately: a
+# permissive declaration doesn't add a checked `allow` rule at compile
+# time, so it doesn't trip these assertions, but it also means the kernel
+# won't enforce denials for *that domain's* actions at runtime (still
+# logged as "would have denied"). The fourth (Bootscreen) is redesigned
+# instead to not need /system writes at all -- see that section below.
+#
+# Using `permissive` is a real, narrower-than-it-sounds tool here (it
+# only affects processes running as that specific domain, nothing else on
+# the system), but it's still a deliberate trade-off, not a first choice
+# -- kept to the one domain (zram/swap) whose job genuinely can't be done
+# any other way without live-device sepolicy iteration this session can't
+# do. See each domain's own comment for the reasoning.
 
-# --- property that the Performance app (system_app) sets ---
+# --- property the Performance/System Tweaks app (system_app) sets ---
 type hexaphone_prop, property_type;
 
-# --- domain the boot-time zram/swap script runs in ---
+# --- zram / swap file (System Tweaks app) ---
+#
+# Permissive rather than explicit allow rules: both the raw zram
+# block-device access and the swap file write hit neverallow rules with
+# no exemption to grant (see file header). The real fix for the
+# block-device half is relabeling /dev/block/zram0 to its own dedicated
+# type (the neverallow only blocks the generic block_device type, per its
+# own "rather force a relabel to a more specific type" comment) -- needs
+# the actual device-tree/kernel labeling verified on a booted device, not
+# guessed here. Scope stays narrow regardless: this domain only ever
+# touches its own hardcoded zram device/sysfs/swap-file paths, never
+# anything attacker-reachable beyond the size/algorithm property values
+# it already reads.
 type hexaphone_zram, domain;
 type hexaphone_zram_exec, exec_type, file_type;
-
 init_daemon_domain(hexaphone_zram)
+permissive hexaphone_zram;
 
-# system_app (the Performance app runs sharedUserId=android.uid.system,
-# which maps to the system_app domain) needs to set our property.
 set_prop(system_app, hexaphone_prop)
-
-# The zram/swap script needs to read the same property back.
 get_prop(hexaphone_zram, hexaphone_prop)
-
-# Toolbox applets (mkswap, swapon, swapoff, dd) invoked by the script.
 allow hexaphone_zram toolbox_exec:file rx_file_perms;
-
-# The swap file under /data.
-allow hexaphone_zram system_data_file:dir rw_dir_perms;
-allow hexaphone_zram system_data_file:file create_file_perms;
-
-# zram block device + its sysfs controls. block_device and sysfs are broad
-# placeholder types here — replace with whatever the actual kernel/device
-# tree labels /dev/block/zram0 and /sys/block/zram0/* as, once synced.
-allow hexaphone_zram block_device:dir search;
-allow hexaphone_zram block_device:blk_file rw_file_perms;
 allow hexaphone_zram sysfs:dir search;
 allow hexaphone_zram sysfs:file rw_file_perms;
+
+# --- SELinux permissive-mode button (System Tweaks app) ---
+#
+# permissive, not `allow`: neverallow * kernel:security setenforce; has no
+# exemption list whatsoever, so no domain can ever hold an explicit allow
+# rule for this permission -- this is the only way to expose the
+# equivalent of `adb shell setenforce 0` from an in-ROM button at all.
+# Deliberately the smallest possible domain: its only job, ever, is
+# running setenforce and exiting (see
+# vendor/hexaphone/bin/hexaphone-selinux-permissive.sh) -- it never reads
+# a property value, a file path, or any other input, so making it
+# permissive doesn't hand out any capability beyond the one it's named
+# for. setenforce 0 itself only lasts until the next reboot regardless.
+type hexaphone_selinux_permissive, domain;
+type hexaphone_selinux_permissive_exec, exec_type, file_type;
+init_daemon_domain(hexaphone_selinux_permissive)
+permissive hexaphone_selinux_permissive;
+
+# --- Bootscreen app's preset directory ---
+#
+# No custom "apply" domain any more -- see scripts/patch-bootanimation.sh:
+# bootanimation itself (the existing, already-privileged `bootanim`
+# domain) now checks /data/hexaphone_bootscreen/bootanimation.zip
+# directly, so Bootscreen only ever needs to write there -- no /system
+# write, no neverallow to route around, no permissive domain needed for
+# this feature at all.
+type hexaphone_bootscreen_data_file, file_type, data_file_type, core_data_file_type;
+allow system_app hexaphone_bootscreen_data_file:dir rw_dir_perms;
+allow system_app hexaphone_bootscreen_data_file:file create_file_perms;
+
+# bootanim runs as user/group graphics (frameworks/base/cmds/bootanimation/
+# bootanim.rc), not system -- the directory is made world-readable (see
+# hexaphone.rc's mkdir mode) so DAC permits this too; SELinux and DAC are
+# both independently enforced, so this domain-level grant is still
+# required on top of that.
+allow bootanim hexaphone_bootscreen_data_file:dir r_dir_perms;
+allow bootanim hexaphone_bootscreen_data_file:file r_file_perms;

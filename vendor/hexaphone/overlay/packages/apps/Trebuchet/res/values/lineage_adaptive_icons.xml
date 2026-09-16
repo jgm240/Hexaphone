@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+     Makes hexagon Trebuchet's default icon shape.
+
+     Trebuchet doesn't read the framework's overlaid config_icon_mask at
+     all for its own home-screen icon grid; IconShapeOverride.java
+     (com.android.launcher3.graphics) reflectively replaces
+     Resources.getSystem()'s config_icon_mask lookup with its own
+     SharedPreferences-backed value (pref_override_icon_shape), which
+     falls back to icon_shape_default (this file, originally
+     @string/mask_path_circle) whenever the user hasn't manually picked a
+     shape in Trebuchet's own settings. That's why the framework-level
+     hexagon overlay (frameworks/base/core/res config_icon_mask) had no
+     effect on the actual launcher grid: Trebuchet was always substituting
+     its own circle default in front of it.
+
+     Full replacement of the upstream file rather than just overriding
+     icon_shape_default, so the new hexagon option also shows up as a
+     named entry in Trebuchet's own icon-shape settings picker
+     (icon_shape_entries/icon_shape_paths are parallel arrays indexed by
+     position, so they have to be replaced together, in full).
+-->
+<resources>
+
+    <string name="icon_pack_default" translatable="false">Default</string>
+
+    <string name="icon_shape_default" translatable="false">@string/mask_path_hexagon</string>
+
+    <!-- Masks names -->
+    <string-array name="icon_shape_entries" translatable="false">
+        <item>@string/icon_shape_hexagon_name</item>
+        <item>@string/icon_shape_circle_name</item>
+        <item>@string/icon_shape_square_name</item>
+        <item>@string/icon_shape_squircle_name</item>
+        <item>@string/icon_shape_teardrop_name</item>
+    </string-array>
+
+    <!-- Mask paths references -->
+    <string-array name="icon_shape_paths" translatable="false">
+        <item>@string/mask_path_hexagon</item>
+        <item>@string/mask_path_circle</item>
+        <item>@string/mask_path_square</item>
+        <item>@string/mask_path_squircle</item>
+        <item>@string/mask_path_teardrop</item>
+    </string-array>
+
+    <!-- Hexagon: Hexaphone default. Same path as the framework's
+         config_icon_mask overlay (vendor/hexaphone/overlay/frameworks/base/
+         core/res/res/values/config.xml) so every icon-mask consumer that
+         *does* read the framework resource stays visually consistent with
+         Trebuchet's own separately-applied shape. -->
+    <string name="icon_shape_hexagon_name" translatable="false">Hexagon</string>
+    <string name="mask_path_hexagon" translatable="false">"M100,50L75,93.3 25,93.3 0,50 25,6.7 75,6.7Z"</string>
+
+    <!-- Circle: default -->
+    <string name="mask_path_circle" translatable="false">"M50 0A50 50,0,1,1,50 100A50 50,0,1,1,50 0"</string>
+    <!-- Rounded square -->
+    <string name="mask_path_square" translatable="false">"M0,20C0,8.954 8.954,0 20,0H80C91.046,0 100,8.954 100,20V80C100,91.046 91.046,100 80,100H20C8.954,100 0,91.046 0,80V20Z"</string>
+    <!-- Straight square: disabled -->
+    <string name="mask_path_straight_square" translatable="false">"M50,0L100,0 100,100 0,100 0,0z"</string>
+    <!-- Squircle -->
+    <string name="mask_path_squircle" translatable="false">"M50,0 C10,0 0,10 0,50 0,90 10,100 50,100 90,100 100,90 100,50 100,10 90,0 50,0 Z"</string>
+    <!-- Teardrop -->
+    <string name="mask_path_teardrop" translatable="false">"M50,0A50,50,0,0 1 100,50 L100,85 A15,15,0,0 1 85,100 L50,100 A50,50,0,0 1 50,0z"</string>
+</resources>

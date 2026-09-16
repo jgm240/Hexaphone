@@ -1,0 +1,6 @@
+# Maps the Bootscreen app's shared preset directory (bootanim reads
+# bootanimation.zip from here directly -- see scripts/patch-bootanimation.sh)
+# to the type hexaphone.te grants bootanim read access to. The directory
+# itself is created at boot by hexaphone.rc's `mkdir` action, which
+# applies this context automatically.
+/data/hexaphone_bootscreen(/.*)?    u:object_r:hexaphone_bootscreen_data_file:s0

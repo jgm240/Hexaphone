@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Performance</string>
+    <string name="app_name">System Tweaks</string>
 
     <string name="zram_section_title">ZRAM (compressed RAM swap)</string>
     <string name="zram_enable">Enable ZRAM</string>
@@ -13,4 +13,9 @@
 
     <string name="apply">Apply</string>
     <string name="reboot_notice">Changes take effect after a reboot.</string>
+
+    <string name="system_section_title">System</string>
+    <string name="selinux_permissive_button">Enable SELinux Permissive Mode</string>
+    <string name="selinux_permissive_warning">Disables SELinux enforcement until the next reboot. Makes the device meaningfully less secure while active — only for debugging, not something to leave on.</string>
+    <string name="selinux_permissive_done">SELinux is now permissive. Resets to enforcing on reboot.</string>
 </resources>

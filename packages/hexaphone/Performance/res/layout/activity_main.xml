@@ -111,5 +111,35 @@
             android:textStyle="italic"
             android:text="@string/reboot_notice" />
 
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="24dp"
+            android:background="#33000000" />
+
+        <!-- System section -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:text="@string/system_section_title" />
+
+        <Button
+            android:id="@+id/button_selinux_permissive"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="@string/selinux_permissive_button" />
+
+        <TextView
+            android:id="@+id/label_selinux_permissive"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingTop="8dp"
+            android:textStyle="italic"
+            android:text="@string/selinux_permissive_warning" />
+
     </LinearLayout>
 </ScrollView>

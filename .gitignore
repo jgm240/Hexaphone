@@ -2,3 +2,7 @@
 *.sparseimage
 logs/
 vendor/hexaphone/prebuilt/apps/*/*.apk
+vendor/hexaphone/art/bootanim/
+vendor/hexaphone/art/bootanimation.zip
+vendor/hexaphone/art/bootscreen-presets/
+vendor/hexaphone/art/bootscreen-presets-work/

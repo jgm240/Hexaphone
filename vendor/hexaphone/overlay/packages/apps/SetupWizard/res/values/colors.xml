@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Brand amber instead of Lineage's teal; also feeds the logo mark
+     (res/drawable/logo.xml references @color/accent) and the setup
+     wizard's buttons/switches/progress indicators. -->
+<resources>
+    <color name="accent">#F2B705</color>
+</resources>

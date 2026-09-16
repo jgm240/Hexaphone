@@ -37,6 +37,12 @@ echo "Patching packages/services/Mms (IMms callingUser API mismatch)..."
 echo "Patching Telecom (StatusHints + ITelecomService API mismatch)..."
 "$PROJECT_ROOT/scripts/patch-telecom.sh"
 
+echo "Patching ImageWallpaper (blank wallpaper on manta's broken HWC)..."
+"$PROJECT_ROOT/scripts/patch-imagewallpaper.sh"
+
+echo "Patching BootAnimation (extra /data search path for Bootscreen)..."
+"$PROJECT_ROOT/scripts/patch-bootanimation.sh"
+
 echo "Copying vendor/hexaphone and packages/hexaphone into source..."
 sync_overlay_trees
 echo "done."
