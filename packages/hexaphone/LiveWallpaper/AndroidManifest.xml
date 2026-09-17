@@ -1,6 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="org.hexaphone.livewallpaper">
+    package="org.hexaphone.livewallpaper"
+    android:sharedUserId="android.uid.system">
+
+    <!--
+      Same UID as System Tweaks and Bootscreen (already
+      sharedUserId=android.uid.system) purely so System Tweaks' backup
+      tool can read this app's color preference via createPackageContext;
+      same-UID apps can access each other's SharedPreferences, cross-
+      package data access is otherwise sandboxed. Nothing else here needs
+      the elevated UID.
+    -->
 
     <application
         android:label="@string/app_name"
@@ -19,6 +29,11 @@
                 android:name="android.service.wallpaper"
                 android:resource="@xml/live_wallpaper" />
         </service>
+
+        <activity
+            android:name=".ColorSettingsActivity"
+            android:label="@string/settings_title"
+            android:exported="true" />
 
     </application>
 </manifest>

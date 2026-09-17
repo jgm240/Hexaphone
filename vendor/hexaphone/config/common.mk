@@ -10,12 +10,16 @@
 # tagged -- ro.hexaphone.version is the only on-device record of which
 # release is actually installed. Was stuck at 1.0 through the alphav1.1.0
 # release (nothing wired this to the tag automatically); caught while
-# building Hexaphone Updater (packages/hexaphone/Updater), though Updater
-# itself doesn't read it back -- SystemProperties is a hidden API and
-# Updater is deliberately unprivileged, so it has no way to check it.
+# building Hexaphone Updater (packages/hexaphone/Updater). Updater itself
+# still doesn't read this back -- its self-update/What's New logic
+# compares against jgm240/hexaphone-apps' manifest.json and
+# Build.VERSION.INCREMENTAL instead, both public APIs, and that's kept
+# even though Updater is a priv-app as of this release so it could now
+# read hidden SystemProperties -- no reason to trade a working
+# public-API mechanism for a hidden one.
 HEXAPHONE_BUILDTYPE := UNOFFICIAL
 HEXAPHONE_VERSION_MAJOR := 1
-HEXAPHONE_VERSION_MINOR := 1
+HEXAPHONE_VERSION_MINOR := 2
 
 PRODUCT_PROPERTY_OVERRIDES += \
     ro.hexaphone.version=$(HEXAPHONE_VERSION_MAJOR).$(HEXAPHONE_VERSION_MINOR) \

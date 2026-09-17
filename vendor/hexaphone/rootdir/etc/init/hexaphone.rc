@@ -29,15 +29,27 @@ on post-fs-data
     # can write directly; mode 0755 (not 0770) since bootanimation runs
     # as user/group graphics, not system -- DAC and SELinux are both
     # independently enforced, so this needs to be world-readable on top
-    # of the SELinux grant in hexaphone.te. SELinux type comes from
-    # vendor/hexaphone/sepolicy/file_contexts, applied automatically by
-    # this mkdir action.
+    # of the SELinux grant in hexaphone.te.
     mkdir /data/hexaphone_bootscreen 0755 system system
+    # init's mkdir builtin (system/core/init/builtins.cpp do_mkdir) only
+    # ever sets DAC mode/owner -- it does NOT apply the SELinux label
+    # from vendor/hexaphone/sepolicy/file_contexts the way it might look
+    # like it should. Without this explicit restorecon, the directory
+    # silently inherits /data's own type (system_data_file) instead of
+    # hexaphone_bootscreen_data_file, so bootanim's `allow` grant in
+    # hexaphone.te never matches anything real on disk and every preset
+    # silently fails to apply at boot -- the write from Bootscreen (as
+    # system_app, which system_data_file already exempts from the
+    # no-write neverallow) succeeds either way, which is exactly why this
+    # was invisible from the app side. Found this by re-reading do_mkdir's
+    # actual source after a preset didn't apply on a real boot.
+    restorecon --recursive /data/hexaphone_bootscreen
 
-# SELinux permissive-mode button (Performance app, System section). A
-# plain sys.* property, not persist.* -- this represents a one-shot
-# command ("do this now"), not state to reapply at every boot, and
-# setenforce 0 itself already only lasts until the next reboot regardless.
+# SELinux permissive toggle (System Tweaks app + its QS tile). A plain
+# sys.* property, not persist.* -- this represents a one-shot command
+# ("apply this value now"), not state to reapply at every boot, and
+# setenforce 0 itself already only lasts until the next reboot
+# regardless of whether anything ever sets it back to enforcing first.
 service hexaphone_selinux_permissive /system/bin/hexaphone-selinux-permissive.sh
     class main
     user root
@@ -46,5 +58,8 @@ service hexaphone_selinux_permissive /system/bin/hexaphone-selinux-permissive.sh
     disabled
     seclabel u:r:hexaphone_selinux_permissive:s0
 
-on property:sys.hexaphone.selinux_permissive=1
+# Fires on *every* value change (not just =1) -- the script itself reads
+# the property back to decide permissive vs enforcing, so this just needs
+# to notice something changed.
+on property:sys.hexaphone.selinux_permissive=*
     start hexaphone_selinux_permissive

@@ -11,6 +11,14 @@ import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TextView;
 
+import org.json.JSONObject;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
+
 /**
  * Lets the user configure ZRAM (compressed RAM swap) and/or a storage-backed
  * swap file. This activity only ever writes persist.sys.hexaphone.* system
@@ -27,10 +35,6 @@ public class MainActivity extends Activity {
     private static final String PROP_ZRAM_SIZE_MB = "persist.sys.hexaphone.zram.size_mb";
     private static final String PROP_SWAP_ENABLED = "persist.sys.hexaphone.swap.enabled";
     private static final String PROP_SWAP_SIZE_MB = "persist.sys.hexaphone.swap.size_mb";
-
-    // Not persist.* -- a one-shot command ("do this now"), not state to
-    // reapply at every boot. See vendor/hexaphone/rootdir/etc/init/hexaphone.rc.
-    private static final String PROP_SELINUX_PERMISSIVE = "sys.hexaphone.selinux_permissive";
 
     // Total RAM is 2GB. ZRAM eats real RAM to hold compressed pages, so it
     // must stay well under that — cap at 1.5GB, default to something modest.
@@ -53,6 +57,10 @@ public class MainActivity extends Activity {
     private TextView labelSwapSize;
 
     private TextView labelSelinuxPermissive;
+    private Button buttonSelinuxPermissive;
+
+    private static final String BACKUP_FILE_NAME = "hexaphone-backup.json";
+    private TextView labelBackup;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,15 +105,113 @@ public class MainActivity extends Activity {
         });
 
         labelSelinuxPermissive = (TextView) findViewById(R.id.label_selinux_permissive);
-        findViewById(R.id.button_selinux_permissive).setOnClickListener(new View.OnClickListener() {
+        buttonSelinuxPermissive = (Button) findViewById(R.id.button_selinux_permissive);
+        buttonSelinuxPermissive.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                SystemProperties.set(PROP_SELINUX_PERMISSIVE, "1");
-                labelSelinuxPermissive.setText(R.string.selinux_permissive_done);
+                boolean goingPermissive = SelinuxState.isEnforcing();
+                SelinuxState.setPermissive(goingPermissive);
+                updateSelinuxButton(goingPermissive);
+            }
+        });
+        updateSelinuxButton(!SelinuxState.isEnforcing());
+
+        labelBackup = (TextView) findViewById(R.id.label_backup);
+        findViewById(R.id.button_backup_export).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                exportBackup();
+            }
+        });
+        findViewById(R.id.button_backup_restore).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                restoreBackup();
             }
         });
 
         loadCurrentState();
+    }
+
+    private File backupFile() {
+        return new File(getExternalFilesDir(null), BACKUP_FILE_NAME);
+    }
+
+    private void exportBackup() {
+        HexaphoneBackup backup = BackupManager.gather(this);
+        File dest = backupFile();
+        try {
+            OutputStream out = new FileOutputStream(dest);
+            try {
+                out.write(backup.toJson().toString(2).getBytes("UTF-8"));
+            } finally {
+                out.close();
+            }
+            labelBackup.setText(getString(R.string.backup_exported, dest.getAbsolutePath()));
+        } catch (Exception e) {
+            labelBackup.setText(getString(R.string.backup_export_failed,
+                    e.getMessage() != null ? e.getMessage() : e.toString()));
+        }
+    }
+
+    private void restoreBackup() {
+        File src = backupFile();
+        if (!src.exists()) {
+            labelBackup.setText(getString(R.string.backup_not_found, src.getAbsolutePath()));
+            return;
+        }
+        try {
+            InputStream in = new FileInputStream(src);
+            byte[] buffer;
+            try {
+                buffer = new byte[(int) src.length()];
+                int total = 0;
+                int n;
+                while (total < buffer.length && (n = in.read(buffer, total, buffer.length - total)) != -1) {
+                    total += n;
+                }
+            } finally {
+                in.close();
+            }
+            HexaphoneBackup backup = HexaphoneBackup.fromJson(new JSONObject(new String(buffer, "UTF-8")));
+            BackupManager.restore(this, backup);
+
+            StringBuilder missing = new StringBuilder();
+            for (String pkg : backup.installedPackages) {
+                try {
+                    getPackageManager().getPackageInfo(pkg, 0);
+                } catch (android.content.pm.PackageManager.NameNotFoundException e) {
+                    if (missing.length() > 0) {
+                        missing.append(", ");
+                    }
+                    missing.append(pkg);
+                }
+            }
+            labelBackup.setText(missing.length() == 0
+                    ? getString(R.string.backup_restored)
+                    : getString(R.string.backup_restored_missing, missing.toString()));
+        } catch (Exception e) {
+            labelBackup.setText(getString(R.string.backup_restore_failed,
+                    e.getMessage() != null ? e.getMessage() : e.toString()));
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Reflects a toggle made via the Quick Settings tile while this
+        // activity was backgrounded.
+        updateSelinuxButton(!SelinuxState.isEnforcing());
+    }
+
+    private void updateSelinuxButton(boolean permissive) {
+        if (permissive) {
+            buttonSelinuxPermissive.setText(R.string.selinux_enforcing_button);
+            labelSelinuxPermissive.setText(R.string.selinux_permissive_done);
+        } else {
+            buttonSelinuxPermissive.setText(R.string.selinux_permissive_button);
+            labelSelinuxPermissive.setText(R.string.selinux_permissive_warning);
+        }
     }
 
     private void loadCurrentState() {

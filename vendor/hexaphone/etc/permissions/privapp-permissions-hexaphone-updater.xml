@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Privapp-permissions whitelist for Hexaphone Updater (org.hexaphone.updater).
+
+  A priv-app being platform-signed is NOT enough on its own to get a
+  signature|privileged permission grant; confirmed by reading
+  PermissionManagerService.grantSignaturePermission(): when the package
+  is privileged and the permission's source is the platform package, it
+  additionally requires a matching entry here, checked via
+  hasPrivappWhitelistEntry(), or the grant is refused. This is the same
+  mechanism AOSP itself uses (see frameworks/base/data/etc/
+  privapp-permissions-platform.xml for the stock example this follows).
+
+  Both permissions below back one-tap flash:
+    - REBOOT: to reboot straight into recovery after a verified download.
+    - ACCESS_CACHE_FILESYSTEM: to write /cache/recovery/command; SELinux
+      (priv_app.te) already allows this for any priv_app, but the
+      directory is also DAC-owned system:cache 0770, and this permission
+      is what actually grants the process the supplementary "cache" GID
+      (see frameworks/base/data/etc/platform.xml) needed to pass that
+      separate Unix-permissions check.
+-->
+<permissions>
+    <privapp-permissions package="org.hexaphone.updater">
+        <permission name="android.permission.REBOOT" />
+        <permission name="android.permission.ACCESS_CACHE_FILESYSTEM" />
+    </privapp-permissions>
+</permissions>

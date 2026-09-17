@@ -8,10 +8,17 @@
 
     <string name="action_download">Download</string>
     <string name="action_retry">Retry</string>
+    <string name="action_flash">Flash Now</string>
 
-    <string name="status_downloaded">Downloaded to Android/data/org.hexaphone.updater/files/%1$s. Reboot to recovery (TWRP) and flash it from there.</string>
+    <string name="status_downloaded">Downloaded %1$s. Tap Flash Now to reboot into recovery and install it automatically, or do it by hand from TWRP instead.</string>
+    <string name="flash_confirm_title">Flash %1$s?</string>
+    <string name="flash_confirm_message">The tablet will reboot into recovery and install this build now. Don\'t unplug or power off during the flash.</string>
+    <string name="status_flash_failed">Couldn\'t start the flash automatically. Reboot to recovery (TWRP) and flash it from there instead.</string>
 
     <string name="self_update_title">Hexaphone Updater %1$s available</string>
     <string name="action_self_update">Update</string>
     <string name="status_installing_self_update">Installing… the app may restart.</string>
+
+    <string name="whats_new_title">What\'s new in %1$s</string>
+    <string name="whats_new_empty">(No release notes.)</string>
 </resources>

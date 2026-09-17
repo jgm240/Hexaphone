@@ -9,6 +9,7 @@ source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
 "$PROJECT_ROOT/scripts/patch-telecom.sh"
 "$PROJECT_ROOT/scripts/patch-imagewallpaper.sh"
 "$PROJECT_ROOT/scripts/patch-bootanimation.sh"
+"$PROJECT_ROOT/scripts/patch-trebuchet-drawer-bg.sh"
 sync_overlay_trees
 
 # `breakfast hexaphone_manta` (no dash) would wrongly assume it's a stock

@@ -1,6 +1,10 @@
 package org.hexaphone.updater;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,6 +13,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.io.File;
+import java.io.IOException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -28,6 +33,18 @@ import java.util.TimeZone;
  */
 public class MainActivity extends Activity implements DownloadReleaseTask.Listener {
 
+    // Tracks "downloaded this release, expecting to reboot into it soon"
+    // across app restarts (a manual TWRP flash always restarts the app).
+    // Build.VERSION.INCREMENTAL changes with every real Hexaphone build,
+    // so comparing it against what was recorded at download time is how
+    // this tells "actually rebooted into the new build" apart from "just
+    // reopened the app before flashing yet" -- all public APIs, no
+    // SystemProperties needed.
+    private static final String PREFS_NAME = "updater";
+    private static final String KEY_PENDING_TAG = "pending_tag";
+    private static final String KEY_PENDING_BODY = "pending_body";
+    private static final String KEY_PENDING_INCREMENTAL = "pending_incremental";
+
     private LinearLayout listContainer;
     private TextView emptyState;
     private final Map<String, RowViews> rowsByTag = new HashMap<String, RowViews>();
@@ -46,6 +63,9 @@ public class MainActivity extends Activity implements DownloadReleaseTask.Listen
         ReleaseInfo release;
         TextView status;
         Button action;
+        // Set once DownloadReleaseTask finishes; toggles the action
+        // button from "Download" to "Flash Now" for this row.
+        File downloadedFile;
     }
 
     @Override
@@ -68,8 +88,33 @@ public class MainActivity extends Activity implements DownloadReleaseTask.Listen
             }
         });
 
+        checkWhatsNew();
         checkSelfUpdate();
         loadReleases();
+    }
+
+    private void checkWhatsNew() {
+        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        String pendingTag = prefs.getString(KEY_PENDING_TAG, null);
+        String pendingIncremental = prefs.getString(KEY_PENDING_INCREMENTAL, null);
+        if (pendingTag == null || pendingIncremental == null) {
+            return;
+        }
+        if (pendingIncremental.equals(Build.VERSION.INCREMENTAL)) {
+            // Downloaded but not flashed yet (or flashed a dirty update
+            // that didn't actually change the running build) -- wait
+            // for INCREMENTAL to actually change before claiming this.
+            return;
+        }
+        String body = prefs.getString(KEY_PENDING_BODY, "");
+        prefs.edit().remove(KEY_PENDING_TAG).remove(KEY_PENDING_BODY)
+                .remove(KEY_PENDING_INCREMENTAL).apply();
+
+        new AlertDialog.Builder(this)
+                .setTitle(getString(R.string.whats_new_title, pendingTag))
+                .setMessage(body.isEmpty() ? getString(R.string.whats_new_empty) : body)
+                .setPositiveButton(android.R.string.ok, null)
+                .show();
     }
 
     private void checkSelfUpdate() {
@@ -177,7 +222,11 @@ public class MainActivity extends Activity implements DownloadReleaseTask.Listen
             action.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    startDownload(rv);
+                    if (rv.downloadedFile != null) {
+                        confirmFlash(rv);
+                    } else {
+                        startDownload(rv);
+                    }
                 }
             });
 
@@ -227,6 +276,14 @@ public class MainActivity extends Activity implements DownloadReleaseTask.Listen
 
     @Override
     public void onDownloaded(final File file) {
+        if (currentTaskRow != null) {
+            currentTaskRow.downloadedFile = file;
+            getSharedPreferences(PREFS_NAME, MODE_PRIVATE).edit()
+                    .putString(KEY_PENDING_TAG, currentTaskRow.release.tagName)
+                    .putString(KEY_PENDING_BODY, currentTaskRow.release.body)
+                    .putString(KEY_PENDING_INCREMENTAL, Build.VERSION.INCREMENTAL)
+                    .apply();
+        }
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -234,10 +291,41 @@ public class MainActivity extends Activity implements DownloadReleaseTask.Listen
                     currentTaskRow.status.setVisibility(View.VISIBLE);
                     currentTaskRow.status.setText(getString(R.string.status_downloaded,
                             file.getName()));
+                    currentTaskRow.action.setText(R.string.action_flash);
                 }
                 finishTask();
             }
         });
+    }
+
+    private void confirmFlash(final RowViews rv) {
+        new AlertDialog.Builder(this)
+                .setTitle(getString(R.string.flash_confirm_title, rv.release.tagName))
+                .setMessage(R.string.flash_confirm_message)
+                .setPositiveButton(R.string.action_flash, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        doFlash(rv);
+                    }
+                })
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
+    }
+
+    private void doFlash(RowViews rv) {
+        try {
+            // On success the device reboots into recovery almost
+            // immediately; there's nothing further to do here.
+            RecoveryFlasher.flash(this, rv.downloadedFile);
+        } catch (IOException | SecurityException e) {
+            // Most likely cause: this install isn't the real priv-app
+            // (e.g. reinstalled from Hexaphone Store's catalog rather
+            // than the one baked into system.img), so either SELinux or
+            // the /cache/recovery DAC permissions refused the write, or
+            // REBOOT wasn't actually granted (SecurityException).
+            rv.status.setVisibility(View.VISIBLE);
+            rv.status.setText(R.string.status_flash_failed);
+        }
     }
 
     private void finishTask() {

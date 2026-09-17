@@ -16,6 +16,20 @@
 
     <string name="system_section_title">System</string>
     <string name="selinux_permissive_button">Enable SELinux Permissive Mode</string>
+    <string name="selinux_enforcing_button">Return to Enforcing</string>
     <string name="selinux_permissive_warning">Disables SELinux enforcement until the next reboot. Makes the device meaningfully less secure while active — only for debugging, not something to leave on.</string>
-    <string name="selinux_permissive_done">SELinux is now permissive. Resets to enforcing on reboot.</string>
+    <string name="selinux_permissive_done">SELinux is now permissive. Resets to enforcing on reboot, or tap again.</string>
+
+    <string name="qs_tile_label">SELinux Permissive</string>
+
+    <string name="backup_section_title">Backup</string>
+    <string name="backup_section_subtitle">Saves your Bootscreen choice, wallpaper color, and which Hexaphone Store apps are installed — not a real factory-reset-proof backup, since nothing survives a wipe without moving the file off-device yourself (USB/adb) first.</string>
+    <string name="backup_export">Export</string>
+    <string name="backup_restore">Restore</string>
+    <string name="backup_exported">Saved to %1$s</string>
+    <string name="backup_export_failed">Export failed: %1$s</string>
+    <string name="backup_not_found">No backup found at %1$s — copy one there first.</string>
+    <string name="backup_restored">Restored. Reopen Bootscreen/Live Wallpaper to see it take effect.</string>
+    <string name="backup_restored_missing">Restored. These were installed before but aren\'t now — reinstall via Hexaphone Store: %1$s</string>
+    <string name="backup_restore_failed">Restore failed: %1$s</string>
 </resources>

@@ -1,5 +1,6 @@
 package org.hexaphone.livewallpaper;
 
+import android.content.SharedPreferences;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -19,6 +20,11 @@ import android.view.SurfaceHolder;
  * decode anywhere in this file, so this doesn't touch the same broken-HWC
  * hardware-bitmap path that made static wallpapers go blank; see
  * scripts/patch-imagewallpaper.sh for that bug).
+ *
+ * Color is picked via ColorSettingsActivity (reachable from the system
+ * wallpaper picker's "Customize" affordance) from the same palette
+ * Bootscreen offers, and applied live via a SharedPreferences listener
+ * -- no need to re-apply the wallpaper after changing color.
  */
 public class HexSpinWallpaperService extends WallpaperService {
 
@@ -27,7 +33,8 @@ public class HexSpinWallpaperService extends WallpaperService {
         return new HexEngine();
     }
 
-    private class HexEngine extends Engine {
+    private class HexEngine extends Engine
+            implements SharedPreferences.OnSharedPreferenceChangeListener {
 
         private static final long FRAME_INTERVAL_MS = 1000L / 24L;
         private static final float OUTER_DEG_PER_SEC = 12f;  // one turn per 30s
@@ -57,25 +64,49 @@ public class HexSpinWallpaperService extends WallpaperService {
         private long lastFrameNanos = 0;
         private int glowW = -1;
         private int glowH = -1;
+        private int currentAccent = 0xFFF2B705;
 
         HexEngine() {
             outerPaint.setStyle(Paint.Style.STROKE);
             outerPaint.setStrokeWidth(5f);
-            outerPaint.setColor(0xFFF2B705);
 
             innerPaint.setStyle(Paint.Style.STROKE);
             innerPaint.setStrokeWidth(2.5f);
-            innerPaint.setColor(0x8AF2B705);
 
             centerPaint.setStyle(Paint.Style.FILL);
-            centerPaint.setColor(0xFFF2B705);
 
             dotPaint.setStyle(Paint.Style.FILL);
-            dotPaint.setColor(0xD8FFD54A);
 
             linePaint.setStyle(Paint.Style.STROKE);
             linePaint.setStrokeWidth(1.5f);
-            linePaint.setColor(0x59F2B705);
+
+            applyColors(WallpaperColors.current(HexSpinWallpaperService.this));
+            getSharedPreferences(WallpaperColors.PREFS_NAME, MODE_PRIVATE)
+                    .registerOnSharedPreferenceChangeListener(this);
+        }
+
+        private void applyColors(WallpaperColors colors) {
+            int accent = colors.accent;
+            int light = colors.accentLight;
+            currentAccent = accent;
+            outerPaint.setColor(accent);
+            innerPaint.setColor(withAlpha(accent, 0x8A));
+            centerPaint.setColor(accent);
+            dotPaint.setColor(withAlpha(light, 0xD8));
+            linePaint.setColor(withAlpha(accent, 0x59));
+            glowW = -1; // forces the glow shader to rebuild with the new color
+        }
+
+        private int withAlpha(int color, int alpha) {
+            return (alpha << 24) | (color & 0x00FFFFFF);
+        }
+
+        @Override
+        public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
+            if (WallpaperColors.KEY_COLOR_ID.equals(key)) {
+                applyColors(WallpaperColors.current(HexSpinWallpaperService.this));
+                drawFrame();
+            }
         }
 
         @Override
@@ -93,6 +124,8 @@ public class HexSpinWallpaperService extends WallpaperService {
             super.onSurfaceDestroyed(holder);
             visible = false;
             handler.removeCallbacks(drawRunnable);
+            getSharedPreferences(WallpaperColors.PREFS_NAME, MODE_PRIVATE)
+                    .unregisterOnSharedPreferenceChangeListener(this);
         }
 
         private void drawFrame() {
@@ -142,7 +175,8 @@ public class HexSpinWallpaperService extends WallpaperService {
                 glowH = h;
                 float glowR = outerR * 3.2f;
                 glowPaint.setShader(new RadialGradient(cx, cy, glowR,
-                        new int[] {0x3AF2B705, 0x14F2B705, 0x00F2B705},
+                        new int[] {withAlpha(currentAccent, 0x3A), withAlpha(currentAccent, 0x14),
+                                withAlpha(currentAccent, 0x00)},
                         new float[] {0f, 0.45f, 1f},
                         Shader.TileMode.CLAMP));
             }

@@ -20,15 +20,17 @@ final class ReleaseInfo {
     final String tagName;
     final String name;
     final String publishedAt;
+    final String body;
     final String zipName;
     final String zipUrl;
     final String md5Url;
 
-    private ReleaseInfo(String tagName, String name, String publishedAt, String zipName,
-            String zipUrl, String md5Url) {
+    private ReleaseInfo(String tagName, String name, String publishedAt, String body,
+            String zipName, String zipUrl, String md5Url) {
         this.tagName = tagName;
         this.name = name;
         this.publishedAt = publishedAt;
+        this.body = body;
         this.zipName = zipName;
         this.zipUrl = zipUrl;
         this.md5Url = md5Url;
@@ -59,6 +61,7 @@ final class ReleaseInfo {
                     entry.getString("tag_name"),
                     entry.optString("name", entry.getString("tag_name")),
                     entry.optString("published_at", ""),
+                    entry.optString("body", ""),
                     zipName, zipUrl, md5Url));
         }
         return releases;

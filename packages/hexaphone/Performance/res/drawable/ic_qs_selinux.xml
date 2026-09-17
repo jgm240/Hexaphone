@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  QS tile icon: brand hex outline, filled solid so it reads at the small
+  size/tint QS icons render at (unlike the app's own multi-stroke hex
+  glyphs, which are too fine-detailed for this).
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="#FF000000"
+        android:pathData="M18,12 L15,17.2 9,17.2 6,12 9,6.8 15,6.8 Z" />
+</vector>

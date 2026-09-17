@@ -43,6 +43,9 @@ echo "Patching ImageWallpaper (blank wallpaper on manta's broken HWC)..."
 echo "Patching BootAnimation (extra /data search path for Bootscreen)..."
 "$PROJECT_ROOT/scripts/patch-bootanimation.sh"
 
+echo "Patching Trebuchet (hex-grid texture on the all-apps drawer scrim)..."
+"$PROJECT_ROOT/scripts/patch-trebuchet-drawer-bg.sh"
+
 echo "Copying vendor/hexaphone and packages/hexaphone into source..."
 sync_overlay_trees
 echo "done."

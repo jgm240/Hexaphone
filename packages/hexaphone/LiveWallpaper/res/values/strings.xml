@@ -3,4 +3,7 @@
     <string name="app_name">Hexaphone Live Wallpaper</string>
     <string name="wallpaper_name">Hexaphone</string>
     <string name="wallpaper_description">The boot mark, spinning slowly.</string>
+
+    <string name="settings_title">Hexaphone Wallpaper Color</string>
+    <string name="settings_subtitle">Pick an accent color — same palette as Bootscreen\'s presets.</string>
 </resources>

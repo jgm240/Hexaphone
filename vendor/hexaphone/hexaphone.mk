@@ -40,8 +40,26 @@ PRODUCT_PACKAGES := $(filter-out \
 # vendor/lineage/config/common.mk) points at LineageOS's own update
 # server and hasn't shipped an update since 2016 for anything -- useless
 # dead weight on a ROM with its own release cadence. Replaced by
-# Hexaphone Updater (packages/hexaphone/Updater), fetched on demand
-# through Hexaphone Store rather than preinstalled, same as Bootscreen.
+# Hexaphone Updater (packages/hexaphone/Updater) -- see PRODUCT_PACKAGES
+# below.
+
+# Hexaphone Updater is baked into system.img as a priv-app (not fetched
+# on demand through Hexaphone Store like Bootscreen) because one-tap
+# flash needs real /system/priv-app placement: the priv_app SELinux
+# domain and the REBOOT/ACCESS_CACHE_FILESYSTEM privapp-permissions grant
+# (see the whitelist file below) only apply to an app actually installed
+# there, not to a platform-signed-but-unprivileged PackageInstaller
+# install. Future changes still ship without another full rebuild, since
+# Updater already self-updates in place (see SelfUpdateInstallTask) and
+# PackageInstaller replacing an already-privileged app keeps it
+# privileged. Still also listed in Hexaphone Store's catalog as a manual
+# fallback/reinstall path (without flash support) for anyone who somehow
+# ends up without it.
+PRODUCT_PACKAGES += \
+    HexaphoneUpdater
+
+PRODUCT_COPY_FILES += \
+    vendor/hexaphone/etc/permissions/privapp-permissions-hexaphone-updater.xml:system/etc/permissions/privapp-permissions-hexaphone-updater.xml
 
 # Overlay (colors/fonts/icons) applied on top of frameworks/base — see
 # vendor/hexaphone/overlay/. Kept as a separate device overlay path so it's
