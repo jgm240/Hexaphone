@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hexaphone — Android 9 for the Nexus 10</title>
+<meta name="description" content="Hexaphone is a rebranded LineageOS 16.0 (Android 9) build for the Google Nexus 10 (manta), with its own boot animation, hexagon identity, app store and updater.">
+<meta name="theme-color" content="#000000">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23000'/%3E%3Cpolygon points='85,50 67.5,80.3 32.5,80.3 15,50 32.5,19.7 67.5,19.7' fill='none' stroke='%23F2B705' stroke-width='5'/%3E%3Cpolygon points='60,50 55,58.7 45,58.7 40,50 45,41.3 55,41.3' fill='%23F2B705'/%3E%3C/svg%3E">
+<style>
+@font-face {
+  font-family: "Rajdhani";
+  font-weight: 600;
+  font-display: swap;
+  src: url("assets/Rajdhani-SemiBold-subset.woff") format("woff");
+}
+:root {
+  --bg: #000000;
+  --panel: #0b0b0d;
+  --line: #1d1d22;
+  --text: #e6e9ef;
+  --muted: #8f98a8;
+  --amber: #f2b705;
+  --amber-light: #ffd54a;
+  --amber-dark: #e0980a;
+  --display: "Rajdhani", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --body: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--body);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: var(--amber); text-decoration: none; }
+a:hover { color: var(--amber-light); text-decoration: underline; }
+.wrap { max-width: 980px; margin: 0 auto; padding: 0 24px; }
+h1, h2, h3 { font-family: var(--display); font-weight: 600; letter-spacing: .02em; line-height: 1.15; margin: 0; }
+
+/* header */
+header.top { padding: 22px 0; }
+header.top .wrap { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.brand { display: flex; align-items: center; gap: 10px; font-family: var(--display); font-weight: 600; font-size: 1.4rem; color: var(--text); letter-spacing: .04em; }
+.brand:hover { text-decoration: none; color: var(--text); }
+.brand svg { width: 28px; height: 28px; }
+nav a { color: var(--muted); margin-left: 20px; font-size: .95rem; }
+nav a:hover { color: var(--amber); text-decoration: none; }
+
+/* hero */
+.hero {
+  position: relative;
+  text-align: center;
+  padding: 56px 0 84px;
+  background:
+    radial-gradient(ellipse 60% 55% at 50% 38%, rgba(242,183,5,.13), rgba(242,183,5,0) 70%);
+}
+.mark { width: min(300px, 64vw); height: auto; display: block; margin: 0 auto 22px; overflow: visible; }
+.mark .outer { transform-origin: 160px 160px; animation: spin-cw 60s linear infinite; }
+.mark .inner { transform-origin: 160px 160px; animation: spin-ccw 30s linear infinite; }
+@keyframes spin-cw { to { transform: rotate(360deg); } }
+@keyframes spin-ccw { to { transform: rotate(-360deg); } }
+@media (prefers-reduced-motion: reduce) {
+  .mark .outer, .mark .inner { animation: none; }
+  html { scroll-behavior: auto; }
+}
+.hero h1 { font-size: clamp(2.6rem, 8vw, 4.6rem); }
+.hero .tag { color: var(--muted); font-size: clamp(1.02rem, 2.4vw, 1.25rem); max-width: 620px; margin: 14px auto 0; }
+.pill {
+  display: inline-block; margin-bottom: 18px; padding: 3px 12px;
+  border: 1px solid rgba(242,183,5,.4); border-radius: 999px;
+  color: var(--amber); font-size: .78rem; letter-spacing: .12em; text-transform: uppercase;
+}
+.cta { margin-top: 32px; display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+.btn {
+  display: inline-block; padding: 12px 24px; border-radius: 10px;
+  font-weight: 600; font-size: 1rem; border: 1px solid transparent;
+}
+.btn.primary { background: var(--amber); color: #111; }
+.btn.primary:hover { background: var(--amber-light); text-decoration: none; color: #111; }
+.btn.ghost { border-color: var(--line); color: var(--text); background: var(--panel); }
+.btn.ghost:hover { border-color: var(--amber-dark); color: var(--amber); text-decoration: none; }
+.latest { margin-top: 14px; color: var(--muted); font-size: .9rem; min-height: 1.4em; }
+
+/* sections */
+section { padding: 64px 0; border-top: 1px solid var(--line); }
+section h2 { font-size: clamp(1.7rem, 4vw, 2.3rem); margin-bottom: 8px; }
+section .lead { color: var(--muted); max-width: 700px; margin: 0 0 34px; }
+.grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 22px; }
+.card h3 { font-size: 1.25rem; margin-bottom: 6px; color: var(--amber-light); }
+.card p { margin: 0; color: var(--muted); font-size: .95rem; }
+.card.soon { border-style: dashed; }
+.card.soon h3 { color: var(--text); }
+
+/* downloads / install */
+.dl-box { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 24px; }
+.dl-box dl { margin: 0 0 18px; display: grid; grid-template-columns: max-content 1fr; gap: 6px 18px; font-size: .95rem; }
+.dl-box dt { color: var(--muted); }
+.dl-box dd { margin: 0; word-break: break-word; }
+ol.steps { padding-left: 1.2em; margin: 0; }
+ol.steps li { margin: 0 0 12px; padding-left: 6px; }
+ol.steps li::marker { color: var(--amber); font-weight: 600; }
+code { background: #14141a; border: 1px solid var(--line); border-radius: 6px; padding: 1px 6px; font-size: .9em; }
+.note { margin-top: 22px; padding: 14px 18px; border-left: 3px solid var(--amber-dark); background: var(--panel); border-radius: 0 10px 10px 0; color: var(--muted); font-size: .95rem; }
+.issues { margin: 0; padding-left: 1.2em; }
+.issues li { margin-bottom: 10px; }
+.issues strong { color: var(--text); }
+
+footer { border-top: 1px solid var(--line); padding: 40px 0 56px; color: var(--muted); font-size: .88rem; }
+footer p { margin: 0 0 10px; max-width: 760px; }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="#top" aria-label="Hexaphone home">
+      <svg viewBox="0 0 100 100" aria-hidden="true">
+        <polygon points="95,50 72.5,89 27.5,89 5,50 27.5,11 72.5,11" fill="none" stroke="#F2B705" stroke-width="6"/>
+        <polygon points="64,50 57,62.1 43,62.1 36,50 43,37.9 57,37.9" fill="#F2B705"/>
+      </svg>
+      Hexaphone
+    </a>
+    <nav>
+      <a href="#features">Features</a>
+      <a href="#download">Download</a>
+      <a href="#install">Install</a>
+      <a href="#issues">Known issues</a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+<div class="hero">
+  <div class="wrap">
+    <svg class="mark" viewBox="0 0 320 320" role="img" aria-label="Hexaphone mark: two counter-rotating hexagon rings around a solid hexagon">
+      <defs>
+        <linearGradient id="stroke" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#FFD54A"/>
+          <stop offset="100%" stop-color="#E0980A"/>
+        </linearGradient>
+      </defs>
+      <g class="outer">
+        <polygon points="300,160 230,281.2 90,281.2 20,160 90,38.8 230,38.8" fill="none" stroke="url(#stroke)" stroke-width="5"/>
+        <g fill="#FFD54A">
+          <circle cx="300" cy="160" r="6"/><circle cx="230" cy="281.2" r="6"/><circle cx="90" cy="281.2" r="6"/>
+          <circle cx="20" cy="160" r="6"/><circle cx="90" cy="38.8" r="6"/><circle cx="230" cy="38.8" r="6"/>
+        </g>
+      </g>
+      <g class="inner">
+        <polygon points="248,160 204,236.2 116,236.2 72,160 116,83.8 204,83.8" fill="none" stroke="#F2B705" stroke-width="2.5"/>
+      </g>
+      <polygon points="190,160 175,186 145,186 130,160 145,134 175,134" fill="#F2B705"/>
+    </svg>
+    <span class="pill">Alpha</span>
+    <h1>Hexaphone</h1>
+    <p class="tag">Android 9 for the Google Nexus 10. A rebranded, tinkerer-friendly LineageOS 16.0 build, with its own app store and updater.</p>
+    <div class="cta">
+      <a class="btn primary" id="dl-main" href="https://github.com/jgm240/Hexaphone/releases/latest">Download latest</a>
+      <a class="btn ghost" href="https://github.com/jgm240/Hexaphone">View on GitHub</a>
+    </div>
+    <div class="latest" id="latest-line"></div>
+  </div>
+</div>
+
+<section id="about">
+  <div class="wrap">
+    <h2>What is it?</h2>
+    <p class="lead">LineageOS stopped at Android 7.1 for the Nexus 10 (<code>manta</code>). Hexaphone builds on the community's unofficial Android 9 port of this tablet and turns it into something with its own identity and tooling, so a 2012 device can keep being useful.</p>
+  </div>
+</section>
+
+<section id="features">
+  <div class="wrap">
+    <h2>What you get</h2>
+    <p class="lead">What ships in the current release.</p>
+    <div class="grid">
+      <div class="card">
+        <h3>Hexagon identity</h3>
+        <p>A black boot animation with two hexagon rings spinning in opposite directions, a hexagon default wallpaper, hexagon app-icon shapes, a rebranded setup wizard, and dark mode by default.</p>
+      </div>
+      <div class="card">
+        <h3>Hexaphone Store</h3>
+        <p>A small app store with a live catalog: it reads its list from a manifest online, so new apps show up without a new ROM build. Downloads are hash-verified before they install.</p>
+      </div>
+      <div class="card">
+        <h3>Hexaphone Updater</h3>
+        <p>Browse every Hexaphone release, download one with checksum verification, and move forward or back to any version. It updates itself too.</p>
+      </div>
+      <div class="card">
+        <h3>Live wallpaper</h3>
+        <p>The boot mark, slowly spinning, as a selectable live wallpaper.</p>
+      </div>
+    </div>
+
+    <h2 style="margin-top:56px">In the works</h2>
+    <p class="lead">Written and compiling, but not in a release yet.</p>
+    <div class="grid">
+      <div class="card soon">
+        <h3>One-tap flash</h3>
+        <p>Updater becomes a built-in system app that can reboot straight into recovery and flash the zip it just downloaded.</p>
+      </div>
+      <div class="card soon">
+        <h3>System Tweaks</h3>
+        <p>ZRAM and swap controls, a SELinux permissive quick-settings tile that resets on reboot, and manual backup and restore of your Hexaphone settings.</p>
+      </div>
+      <div class="card soon">
+        <h3>Bootscreen &amp; wallpaper colors</h3>
+        <p>Pick a boot animation color and speed, and recolor the live wallpaper to match.</p>
+      </div>
+      <div class="card soon">
+        <h3>Polish</h3>
+        <p>A hexagon-grid app drawer, a "What's new" screen after each update, and, being finished now, a branded charging screen, a stats widget, a display font and a sound theme.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="download">
+  <div class="wrap">
+    <h2>Download</h2>
+    <p class="lead">The newest release is looked up live from GitHub. Every release has an MD5 checksum next to the zip; check it before you flash.</p>
+    <div class="dl-box">
+      <dl id="dl-details">
+        <dt>Latest</dt><dd id="dl-tag">Loading…</dd>
+        <dt>Released</dt><dd id="dl-date">…</dd>
+        <dt>Size</dt><dd id="dl-size">…</dd>
+      </dl>
+      <div class="cta" style="justify-content:flex-start;margin-top:0">
+        <a class="btn primary" id="dl-zip" href="https://github.com/jgm240/Hexaphone/releases/latest">Download zip</a>
+        <a class="btn ghost" id="dl-md5" href="https://github.com/jgm240/Hexaphone/releases/latest">MD5 checksum</a>
+        <a class="btn ghost" href="https://github.com/jgm240/Hexaphone/releases">All releases</a>
+      </div>
+      <noscript><p class="note">JavaScript is off, so the live lookup is unavailable. Use the All releases link.</p></noscript>
+    </div>
+  </div>
+</section>
+
+<section id="install">
+  <div class="wrap">
+    <h2>Install</h2>
+    <p class="lead">Standard custom-ROM flashing. If you've flashed a tablet before, nothing here will surprise you.</p>
+    <ol class="steps">
+      <li>Back up anything you care about. Moving to Hexaphone from another ROM means wiping data.</li>
+      <li>Unlock the bootloader and install a custom recovery such as TWRP for the Nexus 10.</li>
+      <li>Download the zip above and verify its MD5 checksum.</li>
+      <li>Copy the zip to the tablet, boot to recovery, wipe data, and flash the zip.</li>
+      <li>Reboot. The first boot is slow because the system compiles itself on the device.</li>
+    </ol>
+    <p class="note">Already on Hexaphone? Open <strong>Hexaphone Updater</strong>, pick a release, and download it, then flash it from recovery the same way.</p>
+  </div>
+</section>
+
+<section id="issues">
+  <div class="wrap">
+    <h2>Known issues</h2>
+    <p class="lead">This is an alpha, built on an unofficial port, and these gaps come with it. They haven't been fixed.</p>
+    <ul class="issues">
+      <li><strong>The camera is broken.</strong> HAL1 doesn't work and HAL2 isn't supported, so the camera app is removed.</li>
+      <li><strong>Hardware composer is partly broken.</strong> Some reports of invisible icons, wallpaper glitches and overlay problems.</li>
+      <li><strong>Don't enable disk encryption.</strong> It causes bootloops.</li>
+      <li><strong>NFC is unreliable</strong> and can drain the battery, so NFC support is removed.</li>
+      <li><strong>No Google apps.</strong> There is no Play Store; use Hexaphone Store, F-Droid or Aurora Store.</li>
+    </ul>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>
+      <a href="https://github.com/jgm240/Hexaphone">Hexaphone (source and releases)</a> ·
+      <a href="https://github.com/jgm240/hexaphone-apps">hexaphone-apps (Store catalog and apps)</a> ·
+      <a href="https://github.com/jgm240/Hexaphone/issues">Report a problem</a>
+    </p>
+    <p>Built on <a href="https://lineageos.org">LineageOS</a> and the unofficial Nexus 10 Android 9 port by followmsi (XDA). Hexaphone is an independent hobby project and isn't affiliated with or endorsed by LineageOS or Google. Flash at your own risk.</p>
+    <p>Headings use Rajdhani (SIL Open Font License 1.1, <a href="assets/Rajdhani-OFL.txt">license</a>).</p>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var REPO = "jgm240/Hexaphone";
+  function $(id) { return document.getElementById(id); }
+  function mb(bytes) { return (bytes / 1048576).toFixed(0) + " MB"; }
+
+  fetch("https://api.github.com/repos/" + REPO + "/releases/latest", {
+    headers: { "Accept": "application/vnd.github+json" }
+  }).then(function (r) {
+    if (!r.ok) { throw new Error("HTTP " + r.status); }
+    return r.json();
+  }).then(function (rel) {
+    var assets = rel.assets || [];
+    var zip = null, md5 = null;
+    assets.forEach(function (a) {
+      if (/\.zip$/i.test(a.name) && !zip) { zip = a; }
+      if (/\.md5(sum)?$/i.test(a.name) && !md5) { md5 = a; }
+    });
+    var tag = rel.name || rel.tag_name;
+    $("dl-tag").textContent = tag;
+    $("dl-date").textContent = rel.published_at
+      ? new Date(rel.published_at).toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" })
+      : "";
+    $("latest-line").textContent = "Latest: " + tag;
+    if (zip) {
+      $("dl-size").textContent = mb(zip.size) + " (" + zip.name + ")";
+      $("dl-zip").href = zip.browser_download_url;
+      $("dl-main").href = zip.browser_download_url;
+    } else {
+      $("dl-size").textContent = "see release page";
+      $("dl-zip").href = rel.html_url;
+      $("dl-main").href = rel.html_url;
+    }
+    if (md5) { $("dl-md5").href = md5.browser_download_url; } else { $("dl-md5").href = rel.html_url; }
+  }).catch(function () {
+    $("dl-tag").textContent = "Couldn't reach GitHub just now";
+    $("dl-date").textContent = "see the releases page";
+    $("dl-size").textContent = "";
+  });
+})();
+</script>
+</body>
+</html>
