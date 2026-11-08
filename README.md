@@ -15,6 +15,8 @@ This port ([followmsi](https://github.com/followmsi), XDA) is what makes
 Android 9 possible on this hardware at all, but it comes with real gaps we
 haven't tried to fix:
 
+(followmsi’s port is [here](https://github.com/followmsi/android_device_samsung_manta))
+
 - **Camera is broken** — HAL1 is broken, HAL2 isn't supported. The Camera2
   app is removed from the build for exactly this reason.
 - **Hardware composer partly broken** — reports of invisible icons,
